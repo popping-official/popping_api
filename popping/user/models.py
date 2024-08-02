@@ -5,30 +5,49 @@ import uuid
 # Create your models here.
 
 class User(AbstractBaseUser, PermissionsMixin, TimeModel):
+    
+    '''
+    1. 일반유저, 팝업 담당자 둘다 공통으로 사용하는 필드
+    - email : 이메일
+    - phoneNumber : 전화번호
+    - nickname : 닉네임 / 브랜드네임
+    - isPopper : True = 팝업 담당자 / False = 일반 유저
+
+    2. 일반 유저만 사용하는 필드
+    - name : 실명
+    - isMale : 성별
+
+    3. 팝업 담당자만 사용하는 필드
+    - businessNumber : 사업자 등록증
+    '''
+    
     email = models.EmailField(
         max_length=50,
         unique=True,
     )
+    nickname = models.CharField(
+        # 일반유저한테는 닉네임
+        # 팝업담당자한테는 브랜드네임
+        max_length=25,
+        null=True,
+        blank=True,
+    )
     name = models.CharField(
-        # 일반유저만 실명을 기입함, 팝업 담당자는 X
-        max_length=10,
+        # 일반유저만 기입
+        max_length=12,
         null=True,
         blank=True
-    )
-    nickname = models.CharField(
-        # 일반유저 = 닉네임
-        # 팝업 담당자 = 브랜드 네임
-        max_length=25,
-        unique=True,
     )
     isMale = models.BooleanField(
+        # 일반유저만 기입
         null=True,
         blank=True
     )
-    idNumber = models.CharField(
-        # 일반 유저 = 주민등록번호 (personalNumber)
-        # 팝업 담당자 = 사업자등록번호 (businessNumber)
+    businessNumber = models.CharField(
+        # 팝업 담당자만 기입
         max_length=14,
+        null=True,
+        blank=True
     )
     phoneNumber = models.CharField(
         max_length=13,
