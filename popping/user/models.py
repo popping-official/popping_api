@@ -45,12 +45,12 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
     )
     businessNumber = models.CharField(
         # 팝업 담당자만 기입
-        max_length=14,
+        max_length=10,
         null=True,
         blank=True
     )
     phoneNumber = models.CharField(
-        max_length=13,
+        max_length=11,
     )
     authCode = models.CharField(
         max_length=8
