@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from .models import User
-from .serializers import SignUpSerializer
+from .serializers import SignUpSerializer, UserSerializer
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -45,19 +45,21 @@ class SignUpAPI(APIView):
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
             
-    
-
 
 class UserAPI(APIView):
     permission_classes = [permissions.AllowAny]
     
-    def get(self, request):
+    def get(self, request, uuid):
+        user = User.objects.filter(uuid=uuid).first()
+        if not user:
+            return Response(status=status.HTTP_400_BAD_REQUEST) 
+        serializer = UserSerializer(user, method='get')
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def patch(self, request, uuid):
         return Response(status=status.HTTP_200_OK)
     
-    def patch(self, request):
-        return Response(status=status.HTTP_200_OK)
-    
-    def delete(self, request):
+    def delete(self, request, uuid):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
