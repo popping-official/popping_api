@@ -86,9 +86,9 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
 
 class SocialUser(TimeModel): 
     PROVIDER_CHOICES = [
-        ('naver', 'Naver'),
-        ('kakao', 'Kakao'),
-        ('google', 'Google'),
+        ('naver', 'naver'),
+        ('kakao', 'kakao'),
+        ('google', 'google'),
     ]
     userFK = models.ForeignKey(
         'user.User',
