@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import User
 from .serializers import SignUpSerializer, UserSerializer
+from share.utills import generate_auth_code
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -33,6 +34,28 @@ def duplicate_check_api(request, option):
     
     return Response(response_data, status=status.HTTP_200_OK)
 
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def signup_email_send(request):
+    from share.utills import generate_auth_code
+    from django.core.mail import EmailMessage
+    email = request.data.get('email', None)
+    
+    if not email:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    auth_code = generate_auth_code()
+    
+    email = EmailMessage('test', '테스트 메일 전송', to=[email])
+    email.send()
+    
+    response_data = {
+        'authCode' : auth_code
+    }
+    
+    return Response(response_data, status=status.HTTP_200_OK)
+    
 
 class SignUpAPI(APIView):
     def post(self, request):
