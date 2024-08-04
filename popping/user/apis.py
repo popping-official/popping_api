@@ -6,7 +6,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from .models import User
-from .serializers import SignUpSerializer
+from .serializers import SignUpSerializer, UserSerializer
+from share.utills import generate_auth_code
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -34,6 +35,28 @@ def duplicate_check_api(request, option):
     return Response(response_data, status=status.HTTP_200_OK)
 
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def signup_email_send(request):
+    from share.utills import generate_auth_code
+    from django.core.mail import EmailMessage
+    email = request.data.get('email', None)
+    
+    if not email:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    auth_code = generate_auth_code()
+    
+    email = EmailMessage('test', '테스트 메일 전송', to=[email])
+    email.send()
+    
+    response_data = {
+        'authCode' : auth_code
+    }
+    
+    return Response(response_data, status=status.HTTP_200_OK)
+    
+
 class SignUpAPI(APIView):
     def post(self, request):
         
@@ -45,19 +68,21 @@ class SignUpAPI(APIView):
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
             
-    
-
 
 class UserAPI(APIView):
     permission_classes = [permissions.AllowAny]
     
-    def get(self, request):
+    def get(self, request, uuid):
+        user = User.objects.filter(uuid=uuid).first()
+        if not user:
+            return Response(status=status.HTTP_400_BAD_REQUEST) 
+        serializer = UserSerializer(user, method='get')
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def patch(self, request, uuid):
         return Response(status=status.HTTP_200_OK)
     
-    def patch(self, request):
-        return Response(status=status.HTTP_200_OK)
-    
-    def delete(self, request):
+    def delete(self, request, uuid):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
