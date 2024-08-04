@@ -53,7 +53,15 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
         max_length=11,
     )
     authCode = models.CharField(
+        # 인증번호용 컬럼
         max_length=8
+    )
+    authType = models.ForeignKey(
+        # 인증 종류 => 어떤 이유로 인증코드를 발급받았는지
+        'user.AuthType',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
     )
     uuid = models.UUIDField(
 		default=uuid.uuid4
@@ -69,5 +77,31 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
         # django에서 필요한 필드기 때문에 python 문법으로 필드명 설정
         default=True
     )
+    isSocialUser = models.BooleanField(
+        # 소셜 로그인 유저 여부
+        default=False
+    )
     USERNAME_FIELD = 'email'
+
+
+class SocialUser(TimeModel): 
+    PROVIDER_CHOICES = [
+        ('naver', 'Naver'),
+        ('kakao', 'Kakao'),
+        ('google', 'Google'),
+    ]
+    userFK = models.ForeignKey(
+        'user.User',
+        on_delete=models.CASCADE
+    )
+    provider = models.CharField(
+        max_length=10,
+        choices=PROVIDER_CHOICES
+    )
+
+    
+class AuthType(models.Model):
+    type = models.TextField()
+    
+
 
