@@ -103,3 +103,29 @@ class AuthType(models.Model):
     type = models.TextField()
     
 
+class UserGrade(models.Model):
+    grade = models.CharField(
+        max_length=10
+    )
+    goal = models.IntegerField(
+        default=0
+    )
+
+class PointHistory(TimeModel):
+    userFK = models.ForeignKey(
+        'user.User',
+        on_delete=models.CASCADE
+    )
+    currentPoint = models.IntegerField(
+        default=0
+    )
+    increasePoint = models.IntegerField(
+        null=True,
+        blank=True
+    )
+    decreasePoint = models.IntegerField(
+        null=True,
+        blank=True
+    )
+    
+    
