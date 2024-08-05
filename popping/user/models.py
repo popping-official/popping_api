@@ -43,9 +43,8 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
         null=True,
         blank=True
     )
-    businessNumber = models.CharField(
+    businessInfo = models.JSONField(
         # 팝업 담당자만 기입
-        max_length=10,
         null=True,
         blank=True
     )
@@ -103,5 +102,4 @@ class SocialUser(TimeModel):
 class AuthType(models.Model):
     type = models.TextField()
     
-
 
