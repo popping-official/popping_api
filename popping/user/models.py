@@ -43,9 +43,8 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
         null=True,
         blank=True
     )
-    businessNumber = models.CharField(
+    businessInfo = models.JSONField(
         # 팝업 담당자만 기입
-        max_length=10,
         null=True,
         blank=True
     )
@@ -104,4 +103,29 @@ class AuthType(models.Model):
     type = models.TextField()
     
 
+class UserGrade(models.Model):
+    grade = models.CharField(
+        max_length=10
+    )
+    goal = models.IntegerField(
+        default=0
+    )
 
+class PointHistory(TimeModel):
+    userFK = models.ForeignKey(
+        'user.User',
+        on_delete=models.CASCADE
+    )
+    currentPoint = models.IntegerField(
+        default=0
+    )
+    increasePoint = models.IntegerField(
+        null=True,
+        blank=True
+    )
+    decreasePoint = models.IntegerField(
+        null=True,
+        blank=True
+    )
+    
+    
