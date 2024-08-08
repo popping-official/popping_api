@@ -48,7 +48,15 @@ class Brands(models.Model):
 
 # online popup's products
 class Product(TimeModel):
-	pass
+	name = models.CharField(
+		max_length=30,
+		)
+
+	option = models.JSONField(
+		default=dict
+		)
+
+
 
 # order list
 class Order(TimeModel):
