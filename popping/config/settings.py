@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 import environ
+import mongoengine
+
 env = environ.Env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -55,10 +57,9 @@ INSTALLED_APPS = [
     'popup',
     'map'
 ]
-import mongoengine
 
-MONGO_DB_NAME = 'poppingmongo'
-MONGO_URI = "mongodb://localhost:27017/poppingmongo"
+MONGO_DB_NAME = env('MONGO_DB_NAME')
+MONGO_URI = env('MONGO_URL')
 
 mongoengine.connect(db=MONGO_DB_NAME, host=MONGO_URI)
 
