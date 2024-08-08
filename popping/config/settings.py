@@ -55,6 +55,12 @@ INSTALLED_APPS = [
     'popup',
     'map'
 ]
+import mongoengine
+
+MONGO_DB_NAME = 'poppingmongo'
+MONGO_URI = "mongodb://localhost:27017/poppingmongo"
+
+mongoengine.connect(db=MONGO_DB_NAME, host=MONGO_URI)
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
