@@ -8,4 +8,3 @@ class Maps(me.Document):
     addr = me.StringField(required=True, unique=True)
     
 # class MapCategory(me.Document):
-    
