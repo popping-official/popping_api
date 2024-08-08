@@ -10,6 +10,29 @@ from .serializers import SignUpSerializer, UserSerializer
 import requests, json
 from pprint import pprint 
 from share.utills import envbuild
+from django.contrib.auth import authenticate, login, logout
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_api(request):
+    email = request.data.get('email', '')
+    password = request.data.get('password', '')
+    user = authenticate(request, email=email, password=password)
+
+    if user is not None:
+        login(request, user)
+        return Response(status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout_api(request):
+    logout(request)
+    return Response(status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -133,32 +156,36 @@ def check_business_registration_api(request):
     return Response({ 'isValid' : is_valid }, status=status.HTTP_200_OK)
 
 
-
 class SignUpAPI(APIView):
+    """_summary_
+        회원가입 API
+    """
+    permission_classes = [permissions.AllowAny]
     def post(self, request):
-        
         serializer = SignUpSerializer(data=request.data)
-        
         if serializer.is_valid():
             serializer.create(serializer.validated_data)
             return Response(status=status.HTTP_201_CREATED)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-            
+                 
 
 class UserAPI(APIView):
-    permission_classes = [permissions.AllowAny]
+    """_summary_
+        유저 RUD
+    """
+    permission_classes = [permissions.IsAuthenticated]
     
-    def get(self, request, uuid):
-        user = User.objects.filter(uuid=uuid).first()
+    def get(self, request):
+        user = request.user
         if not user:
             return Response(status=status.HTTP_400_BAD_REQUEST) 
         serializer = UserSerializer(user, method='get')
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    def patch(self, request, uuid):
+    def patch(self, request):
         return Response(status=status.HTTP_200_OK)
     
-    def delete(self, request, uuid):
+    def delete(self, request):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
