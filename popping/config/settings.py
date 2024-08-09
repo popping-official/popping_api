@@ -74,6 +74,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+}
+
+SESSION_COOKIE_AGE = 1209600  # 2주 (단위 : 초)
+
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
