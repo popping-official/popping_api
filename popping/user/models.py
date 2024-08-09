@@ -97,6 +97,16 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
         # 소셜 로그인 유저 여부
         default=False
     )
+    grade = models.ForeignKey(
+        # 등급
+        'user.UserGrade',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    point = models.IntegerField(
+        default=0
+    )
     
     objects = UserManager()
     
@@ -128,11 +138,27 @@ class AuthType(models.Model):
 
 class UserGrade(models.Model):
     grade = models.CharField(
+        # 등급명
         max_length=10
     )
-    goal = models.IntegerField(
+    minOrderAmount = models.IntegerField(
+        # 최소 주문금액
         default=0
     )
+    maxOrderAmount = models.IntegerField(
+        # 최대 주문금액
+        default=0
+    )
+    earnRate = models.FloatField(
+        # 적립률
+        default=0
+    )
+    discountRate = models.FloatField(
+        # 할인률
+        default=0
+    )
+    
+    
 
 class PointHistory(TimeModel):
     userFK = models.ForeignKey(
