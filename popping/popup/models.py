@@ -53,7 +53,7 @@ class Brands(models.Model):
 # online popup's products
 class Product(TimeModel):
 	brandFK = models.ForeignKey(
-		'popup.Brand',
+		'popup.Brands',
 		on_delete=models.CASCADE
 		)
 
