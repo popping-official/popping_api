@@ -46,8 +46,17 @@ class Brands(models.Model):
 		blank=True
 		)
 
+	followers = models.IntegerField(
+		default=0
+		)
+
 # online popup's products
 class Product(TimeModel):
+	brandFK = models.ForeignKey(
+		'popup.Brand',
+		on_delete=models.CASCADE
+		)
+
 	name = models.CharField(
 		max_length=30,
 		)
