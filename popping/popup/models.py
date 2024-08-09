@@ -46,9 +46,6 @@ class Brands(models.Model):
 		blank=True
 		)
 
-	followers = models.IntegerField(
-		default=0
-		)
 
 # online popup's products
 class Product(TimeModel):

@@ -79,12 +79,15 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
         null=True,
         blank=True
     )
+
     uuid = models.UUIDField(
 		default=uuid.uuid4
 	)
+
     isPopper = models.BooleanField(
         default=False
     )
+
     is_staff = models.BooleanField(
         # django에서 필요한 필드기 때문에 python 문법으로 필드명 설정
         default=False
@@ -107,7 +110,17 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
     point = models.IntegerField(
         default=0
     )
-    
+
+    followed = models.ManyToManyField(
+        'popup.Brands',
+        related_name='followers'  # 역 참조를 위한 필드명 설정
+        )
+
+    saved_product = models.ManyToManyField(
+        'popup.Product',
+        related_name='saving_product'
+        )
+
     objects = UserManager()
     
     USERNAME_FIELD = 'email'
