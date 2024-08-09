@@ -97,7 +97,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
         # 소셜 로그인 유저 여부
         default=False
     )
-    grade = models.ForeignKey(
+    gradeFK = models.ForeignKey(
         # 등급
         'user.UserGrade',
         on_delete=models.CASCADE,
