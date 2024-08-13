@@ -11,7 +11,6 @@ from share.utills import error_response
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-@
 def user_follow_save_toggle(request) -> Response:
 	'''
 	Front End 에서 필요한 데이터
