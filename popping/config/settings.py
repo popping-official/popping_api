@@ -110,12 +110,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('POSTGRES_DATABASE_NAME'),
-        'USER': env('POSTGRES_USER_NAME'),
-        'PASSWORD': env('POSTGRES_USER_PASSWORD'),
-        'HOST': env('POSTGRES_HOST'),
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': env('MARIADB_DATABASE_NAME'),
+        'USER': env('MARIADB_USER_NAME'),
+        'PASSWORD': env('MARIADB_USER_PASSWORD'),
+        'HOST': env('MARIADB_HOST'),
+        'PORT': '3306',
     }
 }
 
