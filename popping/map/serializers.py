@@ -1,10 +1,35 @@
 from rest_framework import serializers
-from .models import Maps
 
-class MapsSerializer(serializers.Serializer):
-    addrName = serializers.CharField(max_length=100)
-    addr = serializers.CharField(max_length=200)
-    geoAddr = serializers.SerializerMethodField()
+class LocationDictSerializer(serializers.Serializer):
+    address = serializers.CharField(max_length=200)
+    placeName = serializers.CharField(max_length=100)
+    geoData = serializers.JSONField(required=False)
+
+class PopupStoreSerializer(serializers.Serializer):
+    id = serializers.CharField(max_length=200)
+    title = serializers.CharField(max_length=200)
+    location = LocationDictSerializer(required=False)
+    startDate = serializers.DateTimeField(required=False)
+    endDate = serializers.DateTimeField(required=False)
+    openTime = serializers.ListField(child=serializers.CharField(), required=False)
+    event = serializers.ListField(child=serializers.CharField(), required=False)
+
+class PlaceSerializer(serializers.Serializer):
+    # id = serializers.CharField(max_length=200)
+    # id = serializers.CharField(source='_id', read_only=True)
+    title = serializers.CharField(max_length=200)
+    bestMenu = serializers.ListField(child=serializers.CharField(), required=False)
+    gradePoint = serializers.IntegerField()
+    loadAddr = serializers.CharField(max_length=200)
+    numberAddr = serializers.CharField(max_length=200)
+    telNumber = serializers.CharField(max_length=200)
+    option = serializers.CharField(max_length=200)
+    charTag = serializers.ListField(child=serializers.CharField(), required=False)
+    tags = serializers.ListField(child=serializers.CharField(), required=False)
+    geoData = serializers.JSONField(required=False)
     
-    def get_geoAddr(self, obj):
-        return (obj.addrName,00.1111111)
+    # def to_representation(self, instance):
+    #     ret = super().to_representation(instance)
+    #     ret['id'] = str(ret['id'])  # ObjectId를 문자열로 변환
+    #     return ret
+    
