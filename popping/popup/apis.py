@@ -11,7 +11,16 @@ from share.utills import error_response
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def user_brand_product_save_toggle(request) -> Response:
+def user_follow_save_toggle(request) -> Response:
+	'''
+	Front End 에서 필요한 데이터
+	type: (Brands, Product) 중 1
+	id: 타입에 맞는 해당 model의 id 값
+
+	:param request:
+	:return:
+	'''
+
 	from user.models import User
 	from .models import Brands, Product
 
@@ -19,45 +28,38 @@ def user_brand_product_save_toggle(request) -> Response:
 	if user_info.is_anonymous:
 		return error_response(code=1)
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def user_offline_popup_save_toggle(request) -> Response:
-	from user.models import User
-	# from map.models import
+	toggle_mapping = {
+		'Brands': (user_info.followed, Brands),
+		'Product': (user_info.saved_product, Product)
+		}
 
-	user_info: User = request.user
-	if user_info.is_anonymous:
-		return error_response(code=1)
+	toggle_type = request.data.get('type', 'Brands')
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def user_brand_follow_toggle(request) -> Response:
-	from user.models import User
-	from .models import Brands
-	'''
+	toggle, model = toggle_mapping.get(toggle_type, (None, None))
 
-	:return: Response
-	'''
+	if toggle is None:
+		return error_response(code=3, field_name='type')
 
-	bid = request.data.get('bid')
+	id = request.data.get('id')
 
-	if bid is None:
-		return error_response(code=3, field_name='Brand ID')
+	if id is None:
+		return error_response(code=3, field_name=f'{toggle_type} ID')
 
 	try:
-		brand_info: Brands = Brands.objects.get(id=bid)
-	except ObjectDoesNotExist as e:
-		return error_response(code=2, field_name='Brands')
+		info: model = model.objects.get(id=id)
+	except ObjectDoesNotExist:
+		return error_response(code=2, field_name=toggle_type)
 
-	user_info: User = request.user
-	if user_info.is_anonymous:
-		return error_response(code=1)
-
-	is_following = user_info.followed.filter(id=brand_info.pk).exists()
-
-	if is_following:
-		user_info.followed.remove(brand_info)
+	if toggle.filter(id=info.pk).exists():
+		toggle.remove(info)
 		return Response(status=status.HTTP_202_ACCEPTED)
 	else:
-		user_info.followed.add(brand_info)
+		toggle.add(info)
 		return Response(status=status.HTTP_201_CREATED)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def user_follow_list_get(request) -> Response:
+
+
+	return Response(status=status.HTTP_200_OK)

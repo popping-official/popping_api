@@ -21,4 +21,5 @@ urlpatterns = [
     # path('admin/', admin.site.urls),
     path('api/users/', include('user.urls')),
     path('api/maps/', include('map.urls')),
-]
+    path('api/popup/', include('popup.urls')),
+    ]
