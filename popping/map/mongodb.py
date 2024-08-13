@@ -1,4 +1,19 @@
 from pymongo import MongoClient
+from config.settings import env
+
+# from pathlib import Path
+# import environ
+
+# env = environ.Env()
+
+# # Build paths inside the project like this: BASE_DIR / 'subdir'.
+# BASE_DIR = Path(__file__).resolve().parent.parent
+
+# env_path = BASE_DIR / ".env"
+
+# if env_path.exists():
+#     with env_path.open("rt", encoding="utf8") as f:
+#         env.read_env(f)
 
 class MongoDBClient:
     _client = None
@@ -7,7 +22,7 @@ class MongoDBClient:
     @classmethod
     def get_client(cls):
         if cls._client is None:
-            cls._client = MongoClient('mongodb://localhost:27017/')
+            cls._client = MongoClient(env('MONGO_URL'))
         return cls._client
 
     @classmethod
