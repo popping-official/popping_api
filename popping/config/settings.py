@@ -37,6 +37,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     # 배포시에 사용될 도메인만 써주면댐!! localhost는 default로 들어가 있음 !
+    'popping.world',
+    'www.popping.world',
+    '127.0.0.1',
+    '42.200.199.134'
 ]
 
 AUTH_USER_MODEL = 'user.User'
@@ -138,6 +142,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -174,6 +180,10 @@ CORS_ALLOW_HEADERS = (
     "x-csrftoken",
     "x-requested-with",
 )
+
+CSRF_TRUSTED_ORIGINS = ['https://popping.world', 'https://www.popping.world']
+CSRF_COOKIE_SECURE = True
+SECURE_REFERRER_POLICY = 'no-referrer-when-downgrade'
 
 CORS_ALLOW_CREDENTIALS = True
 
