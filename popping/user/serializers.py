@@ -130,8 +130,8 @@ class UserManagementSerializer(serializers.ModelSerializer):
                 self.fields['isPopper'] = serializers.BooleanField()
                 self.fields['authCode'] = serializers.CharField()
         else:
-            # patch
-            pass        
+            self.fields['newPassword'] = serializers.CharField()
+            self.fields['uuid'] = serializers.CharField()
 
     class Meta:
         model = User
@@ -240,3 +240,17 @@ class UserManagementSerializer(serializers.ModelSerializer):
         )
         
         return is_send
+    
+    
+    def update_password(self, validated_data):
+        uuid = validated_data.get('uuid')
+        
+        user = User.objects.filter(uuid=uuid).first()
+        if not user:
+            return False    
+        
+        newPassword = validated_data.get('newPassword')
+        user.set_password(newPassword)
+        user.save()
+        
+        return True

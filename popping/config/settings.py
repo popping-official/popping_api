@@ -36,11 +36,11 @@ SECRET_KEY = 'django-insecure-^ycm=3o-d1g(4suic-$hu896&7msuf=%!sx1shu(5)qz@b8(cg
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    # 배포시에 사용될 도메인만 써주면댐!! localhost는 default로 들어가 있음 !
+    'localhost',
     'popping.world',
     'www.popping.world',
     '127.0.0.1',
-    '42.200.199.134'
+    '42.200.199.134',
 ]
 
 AUTH_USER_MODEL = 'user.User'
