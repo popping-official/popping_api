@@ -112,6 +112,17 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': env('POSTGRES_DATABASE_NAME'),
+#         'USER': env('POSTGRES_USER_NAME'),
+#         'PASSWORD': env('POSTGRES_USER_PASSWORD'),
+#         'HOST': env('POSTGRES_HOST'),
+#         'PORT': '5432',
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -120,6 +131,7 @@ DATABASES = {
         'PASSWORD': env('MARIADB_USER_PASSWORD'),
         'HOST': env('MARIADB_HOST'),
         'PORT': '3306',
+
     }
 }
 
@@ -177,7 +189,12 @@ CORS_ALLOW_HEADERS = (
     "authorization",
     "content-type",
     "user-agent",
+    "credentials",
+    "host",
+    "origin",
+    "X-CSRFToken",
     "x-csrftoken",
+    "csrftoken",
     "x-requested-with",
 )
 
@@ -186,6 +203,16 @@ CSRF_COOKIE_SECURE = True
 SECURE_REFERRER_POLICY = 'no-referrer-when-downgrade'
 
 CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+]
+
+## CSRF_COOKIE_NAME 원래 기본 값 => csrftoken
+## CSRF_HEADER_NAME 원래 기본 값 => HTTP_X_CSRFTOKEN
+# CSRF_COOKIE_NAME = 'XSRF-TOKEN'
+# CSRF_HEADER_NAME = 'X-XSRF-TOKEN'
 
 # Email Config
 EMAIL_HOST = 'smtp.gmail.com' 		 

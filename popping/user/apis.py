@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from .models import User
-from .serializers import SignUpSerializer, UserSerializer
+from .serializers import SignUpSerializer, UserSerializer, UserManagementSerializer
 import requests, json
 from pprint import pprint 
 from share.utills import envbuild
@@ -14,22 +14,25 @@ from django.contrib.auth import authenticate, login, logout
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def login_api(request):
+def signin_api(request):
     email = request.data.get('email', '')
     password = request.data.get('password', '')
     user = authenticate(request, email=email, password=password)
 
     if user is not None:
         login(request, user)
-        return Response(status=status.HTTP_200_OK)
+        serializer = UserSerializer(user, method='get')
+        response_body = {
+            'user' : serializer.data
+        }
+        return Response(response_body, status=status.HTTP_200_OK)
     else:
         return Response(status=status.HTTP_400_BAD_REQUEST)
-
     
     
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def logout_api(request):
+def signout_api(request):
     logout(request)
     return Response(status=status.HTTP_200_OK)
 
@@ -40,7 +43,7 @@ def duplicate_check_api(request, option):
     
     """_summary_
     
-        닉네임, 브랜드명, 이메일 중복검사 or 존재여부 체크 api
+        닉네임, 이메일, 전화번호 중복검사 or 존재여부 체크 api
     """
     
     check_data = request.data.get('checkData', None)
@@ -51,7 +54,8 @@ def duplicate_check_api(request, option):
     orm_dict = {
         'nickname' : User.objects.filter(nickname=check_data).exists(),
         'brandName' : User.objects.filter(nickname=check_data).exists(),
-        'email' : User.objects.filter(email=check_data).exists()
+        'email' : User.objects.filter(email=check_data).exists(),
+        'phone' : User.objects.filter(phoneNumber=check_data).exists(),
     }
     
     if not option or not option in orm_dict:
@@ -70,29 +74,22 @@ def signup_email_send_api(request):
         인증 메일 전송 api 
         - Body에 담겨온 email 값으로 인증번호를 첨부하여 이메일을 전송
     """
-    
-    from share.utills import generate_auth_code
-    from django.core.mail import EmailMultiAlternatives
-    from django.template.loader import render_to_string
-    from django.utils.html import strip_tags
+    from .utills import send_auth_email
     
     target_email = request.data.get('email', None)
 
     if not target_email:
         return Response(status=status.HTTP_400_BAD_REQUEST)
     
-    auth_code = generate_auth_code()
-
-    # HTML 템플릿을 렌더링
-    html_content = render_to_string('auth-mail.html', {'auth_code': auth_code})
-    text_content = strip_tags(html_content)
+    subject = '[POPPING] 회원가입 인증 번호 전송'
+    purpose_message = '회원가입에 앞서 이메일 인증을 위해'
+    target_email = [target_email]
     
-    subject = '[POPPING] 이메일 인증 번호 전송'
-
-    email = EmailMultiAlternatives(subject, text_content, 'app.popping@gmail.com', [target_email])
-    # HTML 첨부
-    email.attach_alternative(html_content, "text/html")
-    email.send()
+    auth_code = send_auth_email(
+        target_email=target_email,
+        subject=subject,
+        purpose_message=purpose_message
+    )    
 
     response_data = {
         'authCode' : auth_code
@@ -162,11 +159,15 @@ class SignUpAPI(APIView):
     permission_classes = [permissions.AllowAny]
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.create(serializer.validated_data)
-            return Response(status=status.HTTP_201_CREATED)
-        else:
+        if not serializer.is_valid():
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        user = serializer.create(serializer.validated_data)
+        serializer = UserSerializer(user, method='get')
+        response_body = {
+            'user' : serializer.data
+        }
+        return Response(response_body, status=status.HTTP_201_CREATED)
                  
 
 class UserAPI(APIView):
@@ -188,3 +189,43 @@ class UserAPI(APIView):
     def delete(self, request):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+
+class UserManagementAPI(APIView):
+    
+    permission_classes = [permissions.AllowAny]
+    
+    def post(self, request, option):
+        option_list = ['email', 'auth', 'password']
+        
+        if not option in option_list:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = UserManagementSerializer(data=request.data, option=option, method='post')
+        if not serializer.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        if option == 'email':
+            # 이메일 찾기
+            response_data = {
+                'isExist' : False,
+                'email' : ''
+            }
+            email = serializer.find_email(validated_data=serializer.validated_data)
+            if email:
+                response_data['isExist'] = True
+                response_data['email'] = email
+        elif option == 'auth': 
+            # 비밀번호 재설정을 위한 인증메일 전송
+            is_send = serializer.password_auth(validated_data=serializer.validated_data)
+            response_data = {
+                'isSend' : is_send,
+            }
+        else:
+            # 비밀번호 재설정 링크 전송
+            is_send = serializer.send_password_reset_email(validated_data=serializer.validated_data)
+            response_data = {
+                'isSend' : is_send,
+            }
+        
+        return Response(response_data, status=status.HTTP_200_OK)
