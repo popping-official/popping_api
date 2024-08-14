@@ -36,11 +36,11 @@ SECRET_KEY = 'django-insecure-^ycm=3o-d1g(4suic-$hu896&7msuf=%!sx1shu(5)qz@b8(cg
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    # 배포시에 사용될 도메인만 써주면댐!! localhost는 default로 들어가 있음 !
+    'localhost',
     'popping.world',
     'www.popping.world',
     '127.0.0.1',
-    '42.200.199.134'
+    '42.200.199.134',
 ]
 
 AUTH_USER_MODEL = 'user.User'
@@ -92,7 +92,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'templates')    
+            os.path.join(BASE_DIR, 'templates')
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -198,13 +198,12 @@ CORS_ALLOW_HEADERS = (
     "x-requested-with",
 )
 
-CSRF_TRUSTED_ORIGINS = ['https://popping.world', 'https://www.popping.world']
 CSRF_COOKIE_SECURE = True
 SECURE_REFERRER_POLICY = 'no-referrer-when-downgrade'
-
 CORS_ALLOW_CREDENTIALS = True
-
 CSRF_TRUSTED_ORIGINS = [
+    'https://popping.world',
+    'https://www.popping.world',
     'http://localhost:3000',
     'http://127.0.0.1:3000',
 ]
@@ -215,10 +214,10 @@ CSRF_TRUSTED_ORIGINS = [
 # CSRF_HEADER_NAME = 'X-XSRF-TOKEN'
 
 # Email Config
-EMAIL_HOST = 'smtp.gmail.com' 		 
-EMAIL_PORT = '587' 			 
-EMAIL_HOST_USER = 'app.popping@gmail.com' 	 
-EMAIL_HOST_PASSWORD = 'bblsqfukecmuxrxz'		
-EMAIL_USE_TLS = True			
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER	
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = '587'
+EMAIL_HOST_USER = 'app.popping@gmail.com'
+EMAIL_HOST_PASSWORD = 'bblsqfukecmuxrxz'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
