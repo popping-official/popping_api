@@ -116,12 +116,12 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
         related_name='followers'  # 역 참조를 위한 필드명 설정
         )
 
-    saved_product = models.ManyToManyField(
+    savedProduct = models.ManyToManyField(
         'popup.Product',
         related_name='saving_product'
         )
 
-    saved_popup = models.JSONField(
+    savedPopup = models.JSONField(
         default=list
         )
 

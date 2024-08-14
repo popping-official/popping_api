@@ -19,7 +19,7 @@ class PopupStoreSerializer(serializers.Serializer):
 
     def get_isSaved(self, obj):
         user: User = self.context.get('user')
-        return str(obj.id) in user.saved_popup
+        return str(obj.id) in user.savedPopup
 
 
 class PlaceSerializer(serializers.Serializer):
