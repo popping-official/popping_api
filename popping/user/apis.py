@@ -229,3 +229,15 @@ class UserManagementAPI(APIView):
             }
         
         return Response(response_data, status=status.HTTP_200_OK)
+    
+    
+    def patch(self, request, option):
+        
+        serializer = UserManagementSerializer(data=request.data, option=option, method='patch')
+        if not serializer.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        is_success = serializer.update_password(validated_data=serializer.validated_data)
+        
+        return Response({ 'isSuccess' : is_success }, status=status.HTTP_200_OK)
+        
