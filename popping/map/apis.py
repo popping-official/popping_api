@@ -28,9 +28,11 @@ def store_list(request):
         popupStore_query = popupStore_query.filter(
             location__address__icontains=district
         )
-        
+
+    context = {"user": request.user}
+    print(request.user)
     # 시리얼라이저를 사용하여 데이터 직렬화
-    serializer = PopupStoreSerializer(popupStore_query, many=True)
+    serializer = PopupStoreSerializer(popupStore_query, many=True, context=context)
     
     # 응답 데이터 준비
     response_data = {
