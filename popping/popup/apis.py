@@ -30,8 +30,8 @@ def user_follow_save_toggle(request) -> Response:
 
 	toggle_mapping = {
 		'Brands': (user_info.followed, Brands),
-		'Product': (user_info.saved_product, Product),
-		'Popup': (user_info.saved_popup, PopupStore)
+		'Product': (user_info.savedProduct, Product),
+		'Popup': (user_info.savedPopup, PopupStore)
 		}
 
 	toggle_type = request.data.get('type', 'Brands')
