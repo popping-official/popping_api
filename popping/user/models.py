@@ -121,6 +121,10 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
         related_name='saving_product'
         )
 
+    saved_popup = models.JSONField(
+        default=list
+        )
+
     objects = UserManager()
     
     USERNAME_FIELD = 'email'

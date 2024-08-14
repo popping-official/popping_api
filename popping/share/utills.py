@@ -55,8 +55,6 @@ def error_response(code, model_name=None, field_name=None):
         "message": "An error occurred."
         })
 
-    if error_info["exception"]:
-        raise error_info["exception"](error_info["message"])
 
     return Response({
         "status": {
