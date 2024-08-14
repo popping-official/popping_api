@@ -20,9 +20,9 @@ def user_follow_save_toggle(request) -> Response:
 	:param request:
 	:return:
 	'''
-
 	from user.models import User
 	from .models import Brands, Product
+	from map.models import PopupStore
 
 	user_info: User = request.user
 	if user_info.is_anonymous:
@@ -30,7 +30,8 @@ def user_follow_save_toggle(request) -> Response:
 
 	toggle_mapping = {
 		'Brands': (user_info.followed, Brands),
-		'Product': (user_info.saved_product, Product)
+		'Product': (user_info.saved_product, Product),
+		'Popup': (user_info.saved_popup, PopupStore)
 		}
 
 	toggle_type = request.data.get('type', 'Brands')
@@ -45,17 +46,50 @@ def user_follow_save_toggle(request) -> Response:
 	if id is None:
 		return error_response(code=3, field_name=f'{toggle_type} ID')
 
-	try:
-		info: model = model.objects.get(id=id)
-	except ObjectDoesNotExist:
-		return error_response(code=2, field_name=toggle_type)
-
-	if toggle.filter(id=info.pk).exists():
-		toggle.remove(info)
-		return Response(status=status.HTTP_202_ACCEPTED)
+	if toggle_type == 'Popup':
+		if id in toggle:
+			toggle.remove(id)
+			toggle_status = False
+		else:
+			toggle.append(id)
+			toggle_status = True
 	else:
-		toggle.add(info)
+		try:
+			info: model = model.objects.get(id=id)
+		except ObjectDoesNotExist:
+			return error_response(code=2, model_name=toggle_type)
+
+		if toggle.filter(id=info.pk).exists():
+			toggle.remove(info)
+			toggle_status = False
+		else:
+			toggle.add(info)
+			toggle_status = True
+
+	user_info.save()
+
+	if toggle_status:
 		return Response(status=status.HTTP_201_CREATED)
+	else:
+		return Response(status=status.HTTP_202_ACCEPTED)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def test_function_mongodb(request) -> Response:
+	from map.models import PopupStore
+	from map.serializers import PopupStoreSerializer
+
+	popupStore_query = PopupStore.objects()
+
+	serializer = PopupStoreSerializer(popupStore_query, many=True)
+
+	response_data = {
+		'popupStores': serializer.data
+		}
+
+	return Response(response_data, status=status.HTTP_200_OK)
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
