@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from .models import PopupStore
+from user.models import User
 
 class LocationDictSerializer(serializers.Serializer):
     address = serializers.CharField(max_length=200)
@@ -13,6 +15,12 @@ class PopupStoreSerializer(serializers.Serializer):
     endDate = serializers.DateTimeField(required=False)
     openTime = serializers.ListField(child=serializers.CharField(), required=False)
     event = serializers.ListField(child=serializers.CharField(), required=False)
+    isSaved = serializers.SerializerMethodField()
+
+    def get_isSaved(self, obj):
+        user: User = self.context.get('user')
+        return str(obj.id) in user.saved_popup
+
 
 class PlaceSerializer(serializers.Serializer):
     # id = serializers.CharField(max_length=200)

@@ -80,9 +80,11 @@ def test_function_mongodb(request) -> Response:
 	from map.models import PopupStore
 	from map.serializers import PopupStoreSerializer
 
+	context = {"user": request.user}
+
 	popupStore_query = PopupStore.objects()
 
-	serializer = PopupStoreSerializer(popupStore_query, many=True)
+	serializer = PopupStoreSerializer(popupStore_query, many=True, context=context)
 
 	response_data = {
 		'popupStores': serializer.data
