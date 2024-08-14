@@ -21,7 +21,10 @@ class PopupStore(me.Document):
     endDate = me.DateTimeField(required=False)
     openTime = me.ListField(me.StringField(),required=False)
     event = me.ListField(me.StringField(),required=False)
-    
+    view = me.IntField(required=False, default=0)
+    saved = me.IntField(required=False, default=0)
+    image = me.ImageField(required=False)
+
 class Place(me.Document):
     meta = {
         'collection': 'Place',
@@ -40,7 +43,8 @@ class Place(me.Document):
     tags = me.ListField(me.StringField(),required=True)
     charTag = me.ListField(me.StringField(),required=True)
     geoData = me.PointField(required=False)  # GeoJSON 포인트 형식의 위치 정보
-
+    image = me.ImageField(required=False)
+    
 # class CafePlace(me.Document):
 #     title = me.StringField(unique=True)
 #     bestMenu = me.ListField(me.StringField(), required=True)  
