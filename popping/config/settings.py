@@ -40,7 +40,7 @@ ALLOWED_HOSTS = [
     'popping.world',
     'www.popping.world',
     '127.0.0.1',
-    '42.200.199.134',
+    '14.35.210.5'
 ]
 
 AUTH_USER_MODEL = 'user.User'
