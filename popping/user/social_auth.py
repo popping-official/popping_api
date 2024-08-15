@@ -101,49 +101,49 @@ def social_login(request, provider):
         user_data = user_data.json()
         user_email = user_data['email']
         
-    ### 공통로직  
-    # try:
-    #     user_instance = User.objects.filter(email=user_email, isSocialUser=True).get()
-    #     is_exist = SocialUser.objects.filter(userFK=user_instance.id, provider=provider).exists()
-    #     if not is_exist:
-    #         response_data['isSuccess'] = False
-    #         response_data['message'] = '해당 이메일은 이미 타소셜 계정 혹은 일반 계정으로 회원가입이 되어있습니다.'
-    #         return Response(response_data, status=status.HTTP_400_BAD_REQUEST) 
-    # except:
-    #     ### 새로 회원가입 할 때 중복된 이메일이 있는지 확인 필요
-    #     is_registed = User.objects.filter(email=user_email).exists()
-    #     if is_registed:
-    #         response_data['isSuccess'] = False
-    #         response_data['message'] = '해당 이메일은 이미 일반 회원가입이 되어있습니다.'
-    #         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+    ## 공통로직  
+    try:
+        user_instance = User.objects.filter(email=user_email, isSocialUser=True).get()
+        is_exist = SocialUser.objects.filter(userFK=user_instance.id, provider=provider).exists()
+        if not is_exist:
+            response_data['isSuccess'] = False
+            response_data['message'] = '해당 이메일은 이미 타소셜 계정 혹은 일반 계정으로 회원가입이 되어있습니다.'
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST) 
+    except:
+        ### 새로 회원가입 할 때 중복된 이메일이 있는지 확인 필요
+        is_registed = User.objects.filter(email=user_email).exists()
+        if is_registed:
+            response_data['isSuccess'] = False
+            response_data['message'] = '해당 이메일은 이미 일반 회원가입이 되어있습니다.'
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
         
-    #     random_code = get_random_nickname()
+        random_code = get_random_nickname()
         
-    #     new_user = User.objects.create(
-    #         email = user_email,
-    #         nickname = random_code,
-    #         name = random_code,
-    #         isPopper = False,
-    #         isSocialUser=True,
-    #         gradeFK = UserGrade.objects.get(pk=2)
+        new_user = User.objects.create(
+            email = user_email,
+            nickname = random_code,
+            name = random_code,
+            isPopper = False,
+            isSocialUser=True,
+            gradeFK = UserGrade.objects.get(pk=2)
             
-    #     )
-    #     new_user.set_unusable_password()
-    #     new_user.save()
+        )
+        new_user.set_unusable_password()
+        new_user.save()
         
-    #     provider = SocialUser.objects.create(
-    #         userFK = new_user,
-    #         provider = provider,
-    #     )
-    #     provider.save()
+        provider = SocialUser.objects.create(
+            userFK = new_user,
+            provider = provider,
+        )
+        provider.save()
         
-    #     user_instance = new_user
+        user_instance = new_user
         
-    # # 존재할 경우 로직
-    # login(request, user_instance)
-    # serializer = UserSerializer(user_instance, method='get')
-    # response_data['isSuccess'] = True
-    # response_data['user'] = serializer.data
+    # 존재할 경우 로직
+    login(request, user_instance)
+    serializer = UserSerializer(user_instance, method='get')
+    response_data['isSuccess'] = True
+    response_data['user'] = serializer.data
         
     return Response(response_data, status=status.HTTP_200_OK)
 
