@@ -15,6 +15,10 @@ from django.contrib.auth import authenticate, login, logout
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def signin_api(request):
+    
+    if request.user.is_authenticated:
+        return Response({"detail": "이미 로그인이 되어있습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
     email = request.data.get('email', '')
     password = request.data.get('password', '')
     user = authenticate(request, email=email, password=password)
