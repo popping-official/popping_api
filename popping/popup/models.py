@@ -23,6 +23,10 @@ class Brands(models.Model):
         blank=True
         )
 
+    description = models.TextField(
+    )
+
+
     conditions = models.JSONField(
         # 브랜드 계약 조건
         # 수수료, 등등
@@ -49,6 +53,10 @@ class Brands(models.Model):
     saved = models.IntegerField(
         default=0
         )
+    thumbnail = models.TextField(
+
+        )
+
 
 
 # online popup's products
@@ -64,7 +72,7 @@ class Product(TimeModel):
     description = models.TextField(
     )
     name = models.CharField(
-        max_length=30,
+        max_length=100,
     )
     price = models.IntegerField(
         # 상품 가격
@@ -77,6 +85,9 @@ class Product(TimeModel):
         )
     view = models.IntegerField(
         default=0
+        )
+    thumbnail = models.TextField(
+
         )
 
 
@@ -126,8 +137,7 @@ class Order(TimeModel):
         null=True,
         blank=True
     )
-    
-    
+
 
 # order customer service
 class OrderCS(TimeModel):

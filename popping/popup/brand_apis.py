@@ -16,12 +16,10 @@ def brand_data(request, name):
 	from .main_serializers import BrandsSerializer
 	context = {"user": request.user}
 
-
 	try:
 		brand_info: Brands = Brands.objects.get(name=name)
 	except:
 		return Response(status=status.HTTP_400_BAD_REQUEST)
-
 	return Response(BrandsSerializer(brand_info, context=context).data ,status=status.HTTP_200_OK)
 
 
