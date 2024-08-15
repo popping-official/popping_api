@@ -67,6 +67,8 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
     )
     phoneNumber = models.CharField(
         max_length=11,
+        null=True,
+        blank=True
     )
     authCode = models.CharField(
         # 인증번호용 컬럼

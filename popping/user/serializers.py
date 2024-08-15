@@ -7,7 +7,7 @@ class SignUpSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
     nickname = serializers.CharField()
     name = serializers.CharField(required=False)
-    isMale = serializers.BooleanField(required=False)
+    isMale = serializers.BooleanField(required=False, allow_null=True)
     businessInfo = serializers.JSONField(required=False)
     phoneNumber = serializers.CharField()
     password = serializers.CharField(write_only=True)
