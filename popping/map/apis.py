@@ -30,7 +30,6 @@ def store_list(request):
         )
 
     context = {"user": request.user}
-    print(request.user)
     # 시리얼라이저를 사용하여 데이터 직렬화
     serializer = PopupStoreSerializer(popupStore_query, many=True, context=context)
     

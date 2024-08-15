@@ -46,27 +46,32 @@ def user_follow_save_toggle(request) -> Response:
 	if id is None:
 		return error_response(code=3, field_name=f'{toggle_type} ID')
 
+	try:
+		info: model = model.objects.get(id=id)
+	except ObjectDoesNotExist:
+		return error_response(code=2, model_name=toggle_type)
+
 	if toggle_type == 'Popup':
 		if id in toggle:
 			toggle.remove(id)
+			info.saved -= 1
 			toggle_status = False
 		else:
 			toggle.append(id)
+			info.saved += 1
 			toggle_status = True
 	else:
-		try:
-			info: model = model.objects.get(id=id)
-		except ObjectDoesNotExist:
-			return error_response(code=2, model_name=toggle_type)
-
 		if toggle.filter(id=info.pk).exists():
 			toggle.remove(info)
+			info.saved -= 1
 			toggle_status = False
 		else:
 			toggle.add(info)
+			info.saved += 1
 			toggle_status = True
 
 	user_info.save()
+	info.save()
 
 	if toggle_status:
 		return Response(status=status.HTTP_201_CREATED)

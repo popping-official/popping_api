@@ -16,6 +16,8 @@ class PopupStoreSerializer(serializers.Serializer):
     openTime = serializers.ListField(child=serializers.CharField(), required=False)
     event = serializers.ListField(child=serializers.CharField(), required=False)
     isSaved = serializers.SerializerMethodField()
+    view = serializers.IntegerField()
+    saved = serializers.IntegerField()
 
     def get_isSaved(self, obj):
         user: User = self.context.get('user')
