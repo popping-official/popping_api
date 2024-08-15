@@ -17,8 +17,16 @@ import json
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def store_list(request):
+    response_data = {}
+    
     # 기본적으로 모든 PopupStore 문서를 조회합니다
     popupStore_query = PopupStore.objects()
+    
+    # with open('C:/big15/popping_api/popping/jimage.jpg', 'rb') as file:
+    #     for i in popupStore_query:
+    #         i.image.put(file, content_type='image/jpeg')
+    #         i.save()
+    #         break
     
     # district 파라미터를 GET 요청에서 가져옵니다
     district = request.GET.get('district')
@@ -42,7 +50,7 @@ def store_list(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def surround_place(request,option):
+def surround_place(request):
     response_data = {}
     popup_id = request.GET.get('popupId')
     radius_in_meters = int(request.GET.get('meter'))
@@ -55,7 +63,7 @@ def surround_place(request,option):
     collection = MongoDBClient.get_collection('poppingmongo','Place')
     
     query = {
-        "option": option,
+        # "option": option,
         "geoData": {
             "$near": {
                 "$geometry": {
