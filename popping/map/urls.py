@@ -7,5 +7,5 @@ urlpatterns = [
     path('crawling', daco_crawling, name='crawling'),
     path('geocode', geo_addr, name='geo_addr'),
     path('stores', store_list, name='map-list'),
-    path('surround/<str:option>', surround_place, name='surround'),
+    path('surround', surround_place, name='surround'),
 ]
