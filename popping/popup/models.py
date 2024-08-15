@@ -46,6 +46,10 @@ class Brands(models.Model):
         blank=True
         )
 
+    saved = models.IntegerField(
+        default=0
+        )
+
 
 # online popup's products
 class Product(TimeModel):
@@ -57,13 +61,7 @@ class Product(TimeModel):
         # 상품 uuid
         default=uuid.uuid4
     )
-    productLike = models.IntegerField(
-        # 상품 좋아요
-        default=0
-    )
-    discription = models.CharField(
-        # 상품 소개
-        max_length=100,
+    description = models.TextField(
     )
     name = models.CharField(
         max_length=30,
@@ -74,7 +72,12 @@ class Product(TimeModel):
     option = models.JSONField(
         default=dict
     )
-
+    saved = models.IntegerField(
+        default=0
+        )
+    view = models.IntegerField(
+        default=0
+        )
 
 
 # order list
