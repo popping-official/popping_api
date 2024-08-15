@@ -11,7 +11,11 @@ class BrandsSerializer(serializers.ModelSerializer):
 
     def get_isSaved(self, obj):
         user: User = self.context.get('user')
-        return user.followed.filter(id=obj.id).exists()
+        try:
+            state = user.followed.filter(id=obj.id).exists()
+        except:
+            return False
+        return state
 
     def create(self, validated_data):
         return Brands.objects.create(**validated_data)
@@ -31,4 +35,8 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_isSaved(self, obj):
         user: User = self.context.get('user')
-        return user.savedProduct.filter(id=obj.id).exists()
+        try:
+            state = user.savedProduct.filter(id=obj.id).exists()
+        except:
+            return False
+        return state
