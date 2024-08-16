@@ -54,7 +54,7 @@ def social_login(request, provider):
     if 'localhost' in request_url:
         redirect_domain = 'http://localhost:3000'
     else:
-        redirect_domain = 'https://popping.world.com'
+        redirect_domain = 'https://popping.world'
         
     call_back_url = f"{redirect_domain}/member/social?provider={provider}"
     

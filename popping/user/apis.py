@@ -247,7 +247,7 @@ class UserManagementAPI(APIView):
             if 'localhost' in request_url:
                 redirect_domain = 'http://localhost:3000'
             else:
-                redirect_domain = 'https://popping.world.com'
+                redirect_domain = 'https://popping.world'
             validated_data = serializer.validated_data
             validated_data['redirect_domain'] = redirect_domain
             is_send = serializer.send_password_reset_email(validated_data=validated_data)
