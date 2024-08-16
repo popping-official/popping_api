@@ -52,7 +52,7 @@ class UserSerializer(serializers.ModelSerializer):
             self.fields['isSocialUser'] = serializers.BooleanField()
             self.fields['socialLoginProvider'] = serializers.SerializerMethodField()
             self.fields['gradeInfo'] = serializers.SerializerMethodField()
-            self.fields['point'] = serializers.IntegerField()
+            self.fields['point'] = serializers.SerializerMethodField()
         
         elif self.method == 'patch':
             pass        
@@ -77,6 +77,10 @@ class UserSerializer(serializers.ModelSerializer):
     def get_gradeInfo(self, obj):
         serializers = UserGradeSerializer(obj.gradeFK)
         return serializers.data
+
+    def get_point(self, obj):
+        # 포인트를 천 단위로 구분하여 포맷
+        return "{:,}".format(obj.point)
     
     
     
@@ -99,6 +103,30 @@ class UserGradeSerializer(serializers.ModelSerializer):
         return self.convert_integer(obj.discountRate)  
     
     
+
+class MyPageSerializer(serializers.ModelSerializer):
+    
+    followingNum = serializers.SerializerMethodField()
+    point = serializers.SerializerMethodField()
+    gradeInfo = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = ('followingNum', 'point', 'gradeInfo')
+        depth = 1
+        
+    def get_point(self, obj):
+        # 포인트를 천 단위로 구분하여 포맷
+        return "{:,}".format(obj.point)
+    
+    def get_gradeInfo(self, obj):
+        serializers = UserGradeSerializer(obj.gradeFK)
+        return serializers.data
+    
+    def get_followingNum(self, obj):
+        # obj = user 
+        return len(obj.followed.all())
+    
     
 class UserManagementSerializer(serializers.ModelSerializer):
     
@@ -117,21 +145,17 @@ class UserManagementSerializer(serializers.ModelSerializer):
                 
             elif self.option == 'auth':
                 # 비밀번호 인증메일 전송
-                self.fields['name'] = serializers.CharField(required=False)
-                self.fields['businessNumber'] = serializers.CharField(required=False)
                 self.fields['email'] = serializers.EmailField()
-                self.fields['isPopper'] = serializers.BooleanField()
+                self.fields['phoneNumber'] = serializers.CharField()
                 
             elif self.option == 'password':
                 # 비밀번호 찾기
-                self.fields['name'] = serializers.CharField(required=False)
-                self.fields['businessNumber'] = serializers.CharField(required=False)
                 self.fields['email'] = serializers.EmailField()
-                self.fields['isPopper'] = serializers.BooleanField()
+                self.fields['phoneNumber'] = serializers.CharField()
                 self.fields['authCode'] = serializers.CharField()
         else:
             self.fields['newPassword'] = serializers.CharField()
-            self.fields['uuid'] = serializers.CharField()
+            self.fields['uuid'] = serializers.CharField(allow_null=True)
 
     class Meta:
         model = User
@@ -173,15 +197,10 @@ class UserManagementSerializer(serializers.ModelSerializer):
             비밀번호 재설정을 위한 인증메일 전송
         """
         
-        is_popper = validated_data.get('isPopper')
         email = validated_data.get('email')
-        
-        if is_popper:
-            business_number = validated_data.get('businessNumber')
-            user = User.objects.filter(businessInfo__businessNumber=business_number, email=email).first()
-        else: 
-            name = validated_data.get('name')
-            user = User.objects.filter(name=name, email=email).first()
+        phone_number = validated_data.get('phoneNumber')
+
+        user = User.objects.filter(email=email, phoneNumber=phone_number).first()
             
         if not user:
             return False
@@ -212,17 +231,12 @@ class UserManagementSerializer(serializers.ModelSerializer):
             비밀번호 재설정 링크를 전송
         """
         
-        is_popper = validated_data.get('isPopper')
         email = validated_data.get('email')
         auth_code = validated_data.get('authCode')
+        redirect_domain = validated_data.get('redirect_domain')
         
-        if is_popper:
-            business_number = validated_data.get('businessNumber')
-            user = User.objects.filter(businessInfo__businessNumber=business_number, email=email, authCode=auth_code, authType=3).first()
-        else: 
-            name = validated_data.get('name')
-            user = User.objects.filter(name=name, email=email, authCode=auth_code, authType=3).first()
-            
+        user = User.objects.filter(email=email, authCode=auth_code).first()
+        
         if not user:
             return False
         
@@ -236,7 +250,7 @@ class UserManagementSerializer(serializers.ModelSerializer):
             target_email=target_email,
             subject=subject,
             purpose_message=purpose_message,
-            link='https://popping.world/api/'
+            link=f'{redirect_domain}/member/forgot-password/reset-password?uuid={user.uuid}'
         )
         
         return is_send

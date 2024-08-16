@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from .models import User
-from .serializers import SignUpSerializer, UserSerializer, UserManagementSerializer
+from .serializers import SignUpSerializer, UserSerializer, UserManagementSerializer, MyPageSerializer
 import requests, json
 from pprint import pprint 
 from share.utills import envbuild
@@ -26,14 +26,18 @@ def signin_api(request):
     if user is not None:
         login(request, user)
         serializer = UserSerializer(user, method='get')
+        temp_data = serializer.data
+        temp_data['isLogin'] = True
+        
         response_body = {
-            'user' : serializer.data
+            'user' : temp_data
         }
+        
         return Response(response_body, status=status.HTTP_200_OK)
     else:
         return Response(status=status.HTTP_400_BAD_REQUEST)
     
-    
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def signout_api(request):
@@ -192,6 +196,18 @@ class UserAPI(APIView):
     
     def delete(self, request):
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    
+
+class MyPageAPI(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        if not user:
+            return Response(status=status.HTTP_400_BAD_REQUEST) 
+        serializer = MyPageSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 
@@ -227,7 +243,14 @@ class UserManagementAPI(APIView):
             }
         else:
             # 비밀번호 재설정 링크 전송
-            is_send = serializer.send_password_reset_email(validated_data=serializer.validated_data)
+            request_url = request.build_absolute_uri()
+            if 'localhost' in request_url:
+                redirect_domain = 'http://localhost:3000'
+            else:
+                redirect_domain = 'https://popping.world.com'
+            validated_data = serializer.validated_data
+            validated_data['redirect_domain'] = redirect_domain
+            is_send = serializer.send_password_reset_email(validated_data=validated_data)
             response_data = {
                 'isSend' : is_send,
             }

@@ -143,7 +143,9 @@ def social_login(request, provider):
     login(request, user_instance)
     serializer = UserSerializer(user_instance, method='get')
     response_data['isSuccess'] = True
-    response_data['user'] = serializer.data
+    temp_data = serializer.data
+    temp_data['isLogin'] = True
+    response_data['user'] = temp_data
         
     return Response(response_data, status=status.HTTP_200_OK)
 
