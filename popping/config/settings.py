@@ -84,7 +84,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-SESSION_COOKIE_AGE = 1209600  # 2주 (단위 : 초)
+SESSION_COOKIE_AGE = 2592000  # 30일 (단위 : 초)
 
 ROOT_URLCONF = 'config.urls'
 
@@ -220,4 +220,3 @@ EMAIL_HOST_USER = 'app.popping@gmail.com'
 EMAIL_HOST_PASSWORD = 'bblsqfukecmuxrxz'
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-

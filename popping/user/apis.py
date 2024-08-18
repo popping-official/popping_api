@@ -168,6 +168,7 @@ class SignUpAPI(APIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         if not serializer.is_valid():
+            print(serializer.errors)
             return Response(status=status.HTTP_400_BAD_REQUEST)
         
         user = serializer.create(serializer.validated_data)
@@ -192,9 +193,18 @@ class UserAPI(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def patch(self, request):
+        user = request.user
+        serializer = UserSerializer(data=request.data, method='patch')
+        if not user or not serializer.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer.update_user(serializer.validated_data, user)
         return Response(status=status.HTTP_200_OK)
     
     def delete(self, request):
+        user = request.user
+        if not user:
+            return Response(status=status.HTTP_400_BAD_REQUEST) 
+        user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
     
@@ -265,6 +275,5 @@ class UserManagementAPI(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         
         is_success = serializer.update_password(validated_data=serializer.validated_data)
-        
         return Response({ 'isSuccess' : is_success }, status=status.HTTP_200_OK)
         
