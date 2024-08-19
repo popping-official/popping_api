@@ -55,7 +55,10 @@ class UserSerializer(serializers.ModelSerializer):
             self.fields['point'] = serializers.SerializerMethodField()
         
         elif self.method == 'patch':
-            pass        
+            self.fields['isPopper'] = serializers.BooleanField()
+            self.fields['nickname'] = serializers.CharField()   
+            self.fields['name'] = serializers.CharField(required=False) 
+            self.fields['isMale'] = serializers.BooleanField(required=False, allow_null=True) 
     
     class Meta:
         model = User
@@ -81,6 +84,20 @@ class UserSerializer(serializers.ModelSerializer):
     def get_point(self, obj):
         # 포인트를 천 단위로 구분하여 포맷
         return "{:,}".format(obj.point)
+    
+
+    def update_user(self, validated_data, user):
+        is_popper = validated_data.get('isPopper')
+        nickname = validated_data.get('nickname')
+        
+        user.nickname = nickname
+        
+        if not is_popper:
+            name = validated_data.get('name')
+            is_male = validated_data.get('isMale')
+            user.name = name
+            user.isMale = is_male
+        user.save()
     
     
     
