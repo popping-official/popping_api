@@ -4,6 +4,7 @@ from user.models import User
 import base64
 from django.core.files.base import ContentFile
 
+
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
@@ -19,10 +20,12 @@ class Base64ImageField(serializers.ImageField):
             return base64.b64encode(value.read()).decode('utf-8')
         return None
 
+
 class LocationDictSerializer(serializers.Serializer):
     address = serializers.CharField(max_length=200)
     placeName = serializers.CharField(max_length=100)
     geoData = serializers.JSONField(required=False)
+
 
 class PopupStoreSerializer(serializers.Serializer):
     id = serializers.CharField(max_length=200)
@@ -38,7 +41,6 @@ class PopupStoreSerializer(serializers.Serializer):
     saved = serializers.IntegerField()
     
     def get_isSaved(self, obj):
-        
         user: User = self.context.get('user')
         try:
             return str(obj.id) in user.savedPopup
