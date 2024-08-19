@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, SocialUser, UserGrade, AuthType, PointHistory
+from .models import User, SocialUser, UserGrade, AuthType, PointHistory, UserAddress
 from .utills import change_point
 
 
@@ -297,3 +297,11 @@ class UserManagementSerializer(serializers.ModelSerializer):
         user.save()
         
         return True
+
+
+
+
+class UserAddressSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = UserAddress
+        fields = ('addressName', 'name', 'phoneNumber', 'postNumber','address','detailAddress', 'default')

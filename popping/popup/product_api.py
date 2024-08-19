@@ -39,13 +39,13 @@ class CartAPI(APIView):
 		from .main_serializers import CartSerializers
 
 		if request.user.is_anonymous:
-			return Response(status.HTTP_401_UNAUTHORIZED)
+			return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 		response_data = dict()
 		response_data['brand'] = Brands.objects.get(proceeding=1).name.upper()
 
 		cart_query: Cart = Cart.objects.filter(userFK=request.user)
-		response_data['cart'] = CartSerializers(cart_query, many=True).data
+		response_data['cart'] = CartSerializers(cart_query, many=True, context={'user': request.user}).data
 
 		return Response(response_data, status=status.HTTP_200_OK)
 
@@ -95,12 +95,12 @@ class CartAPI(APIView):
 		from .models import Cart, Product
 
 		if request.user.is_anonymous:
-			return Response(status.HTTP_401_UNAUTHORIZED)
+			return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 		cart_id = request.data.get('id')
 		option = request.data.get('option')
 
-		if not cart_id or not option :
+		if not cart_id or not option:
 			return Response({'error': 'Missing required data'}, status=status.HTTP_400_BAD_REQUEST)
 
 		try:
@@ -123,7 +123,7 @@ class CartAPI(APIView):
 		from .models import Cart
 
 		if request.user.is_anonymous:
-			return Response(status.HTTP_401_UNAUTHORIZED)
+			return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 		cart_id = request.data.get('id')
 
@@ -137,10 +137,8 @@ class CartAPI(APIView):
 @permission_classes([AllowAny])
 def cart_count_get(request):
 	from .models import Cart
-
 	if request.user.is_anonymous:
-		return Response(status.HTTP_401_UNAUTHORIZED)
+		return Response({'count': 0}, status=status.HTTP_200_OK)
 
 	cart_instance: list[Cart] = Cart.objects.filter(userFK=request.user)
-
 	return Response({'count': len(cart_instance)}, status=status.HTTP_200_OK)
