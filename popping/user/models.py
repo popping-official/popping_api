@@ -109,9 +109,6 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
         null=True,
         blank=True
     )
-    point = models.IntegerField(
-        default=0
-    )
 
     followed = models.ManyToManyField(
         'popup.Brands',
@@ -125,7 +122,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
 
     savedPopup = models.JSONField(
         default=list
-        )
+    )
 
     objects = UserManager()
     
@@ -148,9 +145,41 @@ class SocialUser(TimeModel):
     provider = models.CharField(
         max_length=10,
         choices=PROVIDER_CHOICES
-    )
+    )    
 
+
+class PointHistory(TimeModel):
+    userFK = models.ForeignKey(
+        'user.User',
+        on_delete=models.CASCADE
+    )
+    currentPoint = models.IntegerField(
+        # 변경 이후 포인트 즉, 현재 포인트
+        default=0
+    )
+    increasePoint = models.IntegerField(
+        # 증가 포인트
+        null=True,
+        blank=True
+    )
+    decreasePoint = models.IntegerField(
+        # 감소 포인트
+        null=True,
+        blank=True
+    )
+    PointChangeFK = models.ForeignKey(
+        'user.PointChange',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
     
+ 
+"""
+    하단에 위치한 모델들은 인덱스 모델입니다.
+"""
+
+
 class AuthType(models.Model):
     type = models.TextField()
     
@@ -177,23 +206,9 @@ class UserGrade(models.Model):
         default=0
     )
     
-    
 
-class PointHistory(TimeModel):
-    userFK = models.ForeignKey(
-        'user.User',
-        on_delete=models.CASCADE
+class PointChange(models.Model):
+    changeInfo = models.CharField(
+        # 변경정보
+        max_length=10
     )
-    currentPoint = models.IntegerField(
-        default=0
-    )
-    increasePoint = models.IntegerField(
-        null=True,
-        blank=True
-    )
-    decreasePoint = models.IntegerField(
-        null=True,
-        blank=True
-    )
-    
-    
