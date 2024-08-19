@@ -1,10 +1,8 @@
 from django.core.exceptions import ObjectDoesNotExist
-
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-
 from rest_framework.response import Response
-from rest_framework import status
 
 from share.utills import error_response
 
@@ -23,6 +21,9 @@ def user_follow_save_toggle(request) -> Response:
 	from user.models import User
 	from .models import Brands, Product
 	from map.models import PopupStore
+
+	if request.user.is_anonymous:
+		return Response(status.HTTP_401_UNAUTHORIZED)
 
 	user_info: User = request.user
 	if user_info.is_anonymous:
@@ -84,6 +85,8 @@ def user_follow_save_toggle(request) -> Response:
 def test_function_mongodb(request) -> Response:
 	from map.models import PopupStore
 	from map.serializers import PopupStoreSerializer
+	if request.user.is_anonymous:
+		return Response(status.HTTP_401_UNAUTHORIZED)
 
 	context = {"user": request.user}
 
@@ -98,9 +101,16 @@ def test_function_mongodb(request) -> Response:
 	return Response(response_data, status=status.HTTP_200_OK)
 
 
+# 총 3개의 데이터들을 한번에 가지고와서 뿌려주기.
+# Product, Brands, PopupMap
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def user_follow_list_get(request) -> Response:
+	from user.models import User
+	from .main_serializers import UserSavedListSerializer
+	if request.user.is_anonymous:
+		return Response(status.HTTP_401_UNAUTHORIZED)
 
+	userInfo: User = User.objects.get(pk=request.user.pk)
 
-	return Response(status=status.HTTP_200_OK)
+	return Response(UserSavedListSerializer(userInfo).data, status=status.HTTP_200_OK)

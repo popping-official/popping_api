@@ -157,19 +157,19 @@ class OrderCS(TimeModel):
         null=True,
         blank=True
     )
-    
+
+
 class Cart(TimeModel):
     userFK = models.ForeignKey(
         'user.User',
         on_delete=models.DO_NOTHING
     )
+
     productFK = models.ForeignKey(
         'popup.Product',
         on_delete=models.DO_NOTHING
     )
-    totalPrice = models.IntegerField(
-        # 총 결제 가격
-    )
-    
 
-
+    option = models.JSONField(
+        default=dict
+        )
