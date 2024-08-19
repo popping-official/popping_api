@@ -1,12 +1,12 @@
 from rest_framework import serializers
 
 
-from .models import Brands, Product, Cart
-from .sub_serializers import BrandSimpleSerializers, ProductSimpleSerializers, PopupStoreSimpleSerializer
-
+from .models import Brands, Product, Cart, Order, OrderCS
+from .sub_serializers import BrandSimpleSerializers, ProductSimpleSerializers, PopupStoreSimpleSerializer, OrderCSSerializers
 
 
 from user.models import User
+
 
 from map.serializers import PopupStoreSerializer
 from map.models import PopupStore
@@ -72,14 +72,24 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class CartSerializers(serializers.ModelSerializer):
-    product = ProductSerializer(source='productFK')
+    product = serializers.SerializerMethodField()
     class Meta:
         model = Cart
         fields = ('id', 'product', 'option')
 
+    def get_product(self, obj):
+        return ProductSimpleSerializers(obj.productFK, context={'user': self.context.get('user')}).data
 
 
+class PaymentDataSerializers(serializers.ModelSerializer):
+    item = serializers.SerializerMethodField()
+    class Meta:
+        model = Order
+        fields = ('id', 'totalPrice', 'totalDiscount', 'item', )
 
+    def get_item(self, obj):
+        queryset = OrderCS.objects.filter(orderFK=obj)
+        return OrderCSSerializers(queryset, many=True).data
 
 
 

@@ -23,7 +23,7 @@ def user_follow_save_toggle(request) -> Response:
 	from map.models import PopupStore
 
 	if request.user.is_anonymous:
-		return Response(status.HTTP_401_UNAUTHORIZED)
+		return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 	user_info: User = request.user
 	if user_info.is_anonymous:
@@ -109,8 +109,25 @@ def user_follow_list_get(request) -> Response:
 	from user.models import User
 	from .main_serializers import UserSavedListSerializer
 	if request.user.is_anonymous:
-		return Response(status.HTTP_401_UNAUTHORIZED)
+		return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 	userInfo: User = User.objects.get(pk=request.user.pk)
 
 	return Response(UserSavedListSerializer(userInfo).data, status=status.HTTP_200_OK)
+
+
+# @api_view(['GET'])
+# @permission_classes([AllowAny])
+# def follow_count_get(request) -> Response:
+# 	from user.models import User
+# 	from .models import Brands
+#
+# 	if request.user.is_anonymous:
+# 		return Response(status=status.HTTP_401_UNAUTHORIZED)
+#
+# 	user: User = request.user
+#
+# 	if user.isPopper:
+
+
+

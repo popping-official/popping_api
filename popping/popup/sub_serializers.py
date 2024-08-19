@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Brands, Product
+from .models import Brands, Product, OrderCS
 from user.models import User
 
 from map.serializers import LocationDictSerializer, Base64ImageField
@@ -13,8 +13,8 @@ class BrandSimpleSerializers(serializers.ModelSerializer):
 		fields = ('id', 'name', 'description', 'thumbnail', 'isSaved')
 
 	def get_isSaved(self, obj):
-		user: User = self.context.get('user')
 		try:
+			user: User = self.context.get('user')
 			state = user.followed.filter(id=obj.id).exists()
 		except:
 			return False
@@ -26,11 +26,11 @@ class ProductSimpleSerializers(serializers.ModelSerializer):
 
 	class Meta:
 		model = Product
-		fields = ('id', 'name', 'description', 'thumbnail', 'isSaved', 'price')
+		fields = ('id', 'name', 'thumbnail', 'isSaved', 'price', 'option')
 
 	def get_isSaved(self, obj):
-		user: User = self.context.get('user')
 		try:
+			user: User = self.context.get('user')
 			state = user.savedProduct.filter(id=obj.id).exists()
 		except:
 			return False
@@ -45,13 +45,21 @@ class PopupStoreSimpleSerializer(serializers.Serializer):
 	image = Base64ImageField(required=False)
 
 	def get_isSaved(self, obj):
-		user: User = self.context.get('user')
 		try:
+			user: User = self.context.get('user')
 			return str(obj.id) in user.savedPopup
 		except:
 			return False
 
 
+class OrderCSSerializers(serializers.ModelSerializer):
+	product = serializers.SerializerMethodField()
+	class Meta:
+		model = OrderCS
+		fields = ('id', 'product', 'option')
+
+	def get_product(self, obj):
+		return ProductSimpleSerializers(obj.productFK).data
 
 
 
