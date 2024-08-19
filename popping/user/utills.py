@@ -44,3 +44,42 @@ def send_link_email(target_email: list, subject: str, purpose_message: str, link
     email.send()
     
     return True
+
+
+def change_point(user_instance, is_increase, point, type_num):
+    """_summary_
+    Args:
+        user_instance (_user_): 유저 인스턴스
+        is_increase (bool): 증가(적립) = true / 감소(사용) = false
+        point (integer): 증감된 포인트
+        type_num (integer): 
+            1. 신규 회원 적립
+            2. 구매 적립
+            3. 리뷰 적립
+            4. 이벤트 적립
+            5. 상품구매 사용
+    """
+    from .models import PointChange, PointHistory
+    
+    point_history = PointHistory.objects.filter(userFK=user_instance).last()
+    if point_history:
+        before_change_point = point_history.currentPoint
+    else:
+        before_change_point = 0
+
+    point_history = PointHistory.objects.create(
+        userFK = user_instance,
+        PointChangeFK = PointChange.objects.get(pk=type_num),
+    )
+    if is_increase:
+        # 증가 : 적립
+        point_history.increasePoint = point
+        before_change_point += point
+    else:
+        # 감소 : 사용
+        PointHistory.decreasePoint = point
+        before_change_point -= point
+        
+    point_history.currentPoint = before_change_point
+        
+    point_history.save()

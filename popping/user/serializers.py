@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import User, SocialUser, UserGrade, AuthType
+from .models import User, SocialUser, UserGrade, AuthType, PointHistory
+from .utills import change_point
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -23,15 +24,20 @@ class SignUpSerializer(serializers.ModelSerializer):
         user.set_password(password)
         
         # 등급 체계
-        pk_num = 2
-        if user.isPopper:
-            pk_num = 1
+        pk_num = 1
+        if not user.isPopper:
+            pk_num = 2
+            change_point(
+                user_instance=user,
+                is_increase=True,
+                point=1500,
+                type_num=1
+            )
         user.gradeFK = UserGrade.objects.get(pk=pk_num)
         
         user.save()
         
         return user
-        
         
 
 class UserSerializer(serializers.ModelSerializer):
@@ -82,8 +88,11 @@ class UserSerializer(serializers.ModelSerializer):
         return serializers.data
 
     def get_point(self, obj):
+        point_history = PointHistory.objects.filter(userFK=obj).last()
+        if not point_history:
+            return 0
         # 포인트를 천 단위로 구분하여 포맷
-        return "{:,}".format(obj.point)
+        return "{:,}".format(point_history.currentPoint)
     
 
     def update_user(self, validated_data, user):
@@ -133,8 +142,11 @@ class MyPageSerializer(serializers.ModelSerializer):
         depth = 1
         
     def get_point(self, obj):
+        point_history = PointHistory.objects.filter(userFK=obj).last()
+        if not point_history:
+            return 0
         # 포인트를 천 단위로 구분하여 포맷
-        return "{:,}".format(obj.point)
+        return "{:,}".format(point_history.currentPoint)
     
     def get_gradeInfo(self, obj):
         serializers = UserGradeSerializer(obj.gradeFK)

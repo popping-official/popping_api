@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth import login
 from .models import User, SocialUser, UserGrade
 from .serializers import UserSerializer
+from .utills import change_point
 # from django.shortcuts import redirect
 # from rest_framework.permissions import IsAuthenticated, AllowAny
 # from django.http import Http404
@@ -129,6 +130,12 @@ def social_login(request, provider):
             
         )
         new_user.set_unusable_password()
+        change_point(
+            user_instance=new_user,
+            is_increase=True,
+            point=1500,
+            type_num=1
+        )
         new_user.save()
         
         provider = SocialUser.objects.create(
