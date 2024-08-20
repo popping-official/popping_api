@@ -3,6 +3,7 @@ from django.urls import path
 from .apis import user_follow_save_toggle, test_function_mongodb, user_follow_list_get
 from .brand_apis import brand_data, online_popup_store_main_data
 from .product_api import product_data, CartAPI, cart_count_get
+from .order_api import OrderApi
 
 urlpatterns = [
     path('follow/toggle', user_follow_save_toggle, name='follow_toggle'),
@@ -15,4 +16,6 @@ urlpatterns = [
 
     path('cart/data', CartAPI.as_view(), name='cart_data'),
     path('cart/count', cart_count_get, name='cart_data'),
+
+    path('order', OrderApi.as_view(), name='cart_data'),
     ]

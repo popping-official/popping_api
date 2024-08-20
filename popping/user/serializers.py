@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, SocialUser, UserGrade, AuthType, PointHistory
+from .models import User, SocialUser, UserGrade, AuthType, PointHistory, UserAddress
 from .utills import change_point
 from django.db.models import Sum, F
 from popup.models import Order
@@ -353,8 +353,7 @@ class UserManagementSerializer(serializers.ModelSerializer):
         user.set_password(newPassword)
         user.save()
         
-        return True
-    
+        return True    
     
 class PointHistorySerializer(serializers.ModelSerializer):
     
@@ -420,3 +419,9 @@ class UserBenefitSerializer(serializers.ModelSerializer):
     def get_orderAmount(self, obj):
         order_amount = 0        
         return "{:,}".format(order_amount)
+
+
+class UserAddressSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = UserAddress
+        fields = ('addressName', 'name', 'phoneNumber', 'postNumber','address','detailAddress', 'default')

@@ -101,22 +101,16 @@ class Order(TimeModel):
         # 오더 uuid
         default=uuid.uuid4
     )
-    name = models.CharField(
-        # 오더 이름
-        max_length=30,
-    )
     totalPrice = models.IntegerField(
         # 총 결제 가격
     )
+    totalDiscount = models.IntegerField(
+
+        )
     buyDate = models.DateTimeField(
         # 구매 날짜
         null=True,
         blank=True
-    )
-    currency = models.CharField(
-        # 결제 통화
-        max_length=5,
-        default="KRW"
     )
     orderStatus = models.BooleanField(
         # 결제 완료 체크
@@ -137,7 +131,7 @@ class Order(TimeModel):
         null=True,
         blank=True
     )
-
+    deliveryRequest = models.TextField()
 
 # order customer service
 class OrderCS(TimeModel):
@@ -157,6 +151,11 @@ class OrderCS(TimeModel):
         null=True,
         blank=True
     )
+    delivery = models.JSONField(
+        null=True,
+        blank=True
+        )
+
 
 
 class Cart(TimeModel):

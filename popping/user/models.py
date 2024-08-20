@@ -22,7 +22,6 @@ class UserManager(BaseUserManager):
     
 
 class User(AbstractBaseUser, PermissionsMixin, TimeModel):
-    
     '''
     1. 일반유저, 팝업 담당자 둘다 공통으로 사용하는 필드
     - email : 이메일
@@ -112,7 +111,6 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
         null=True,
         blank=True
     )
-
     followed = models.ManyToManyField(
         'popup.Brands',
         related_name='followers'  # 역 참조를 위한 필드명 설정
@@ -215,3 +213,23 @@ class PointChange(models.Model):
         # 변경정보
         max_length=10
     )
+
+
+class UserAddress(models.Model):
+    userFK = models.ForeignKey(
+        'user.User',
+        on_delete=models.DO_NOTHING
+        )
+    addressName = models.CharField(
+        max_length=10
+        )
+    name = models.CharField(
+        max_length=12,
+        )
+    phoneNumber = models.IntegerField()
+    postNumber = models.IntegerField()
+    address = models.TextField()
+    detailAddress = models.TextField()
+    default= models.BooleanField(default=False)
+
+
