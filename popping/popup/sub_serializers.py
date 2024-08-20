@@ -23,10 +23,11 @@ class BrandSimpleSerializers(serializers.ModelSerializer):
 
 class ProductSimpleSerializers(serializers.ModelSerializer):
 	isSaved = serializers.SerializerMethodField()
+	brandFK = serializers.SerializerMethodField()
 
 	class Meta:
 		model = Product
-		fields = ('id', 'name', 'thumbnail', 'isSaved', 'price', 'option')
+		fields = ('id', 'name', 'thumbnail', 'isSaved', 'price', 'option', 'brandFK')
 
 	def get_isSaved(self, obj):
 		try:
@@ -36,6 +37,8 @@ class ProductSimpleSerializers(serializers.ModelSerializer):
 			return False
 		return state
 
+	def get_brandFK(self, obj):
+		return BrandSimpleSerializers(obj.brandFK).data
 
 class PopupStoreSimpleSerializer(serializers.Serializer):
 	id = serializers.CharField(max_length=200)

@@ -105,7 +105,8 @@ class Order(TimeModel):
         # 총 결제 가격
     )
     totalDiscount = models.IntegerField(
-
+        null=True,
+        blank=True
         )
     buyDate = models.DateTimeField(
         # 구매 날짜

@@ -70,7 +70,8 @@ class OrderApi(APIView):
 			)
 		try:
 			order_instance.save()
-		except:
+		except Exception as e:
+			print(e)
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 		cs_list = list()
 		for cart in cart_list:
@@ -87,7 +88,8 @@ class OrderApi(APIView):
 			cs_list.append(order_cs_instance)
 		try:
 			OrderCS.objects.bulk_create(cs_list)
-		except:
+		except Exception as e:
+			print(e)
 			order_instance.delete()
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
