@@ -131,7 +131,47 @@ class Order(TimeModel):
         null=True,
         blank=True
     )
-    deliveryRequest = models.TextField()
+    deliveryFK = models.TextField()
+
+
+class Delivery(TimeModel):
+    userAddressFK = models.ForeignKey(
+        'user.UserAddress',
+        on_delete=models.DO_NOTHING
+        )
+    request = models.TextField()
+    status = models.IntegerField()
+
+
+
+    trackingFK = models.ForeignKey(
+        'popup.Tracking',
+        on_delete=models.DO_NOTHING
+        )
+
+
+class Tracking(TimeModel):
+    courierFK = models.ForeignKey(
+        'popup.Courier',
+        on_delete=models.DO_NOTHING
+        )
+    number = models.IntegerField()
+
+
+class Courier(models.Model):
+    name = models.CharField(
+        max_length=100
+        )
+
+    url = models.URLField(
+        null=True,
+        blank=True
+        )
+
+
+
+
+
 
 # order customer service
 class OrderCS(TimeModel):
