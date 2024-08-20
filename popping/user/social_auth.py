@@ -8,12 +8,6 @@ from django.contrib.auth import login
 from .models import User, SocialUser, UserGrade
 from .serializers import UserSerializer
 from .utills import change_point
-# from django.shortcuts import redirect
-# from rest_framework.permissions import IsAuthenticated, AllowAny
-# from django.http import Http404
-# from .models import MUM_T_USER, MUM_T_SOCIAL_USER, MUM_T_TOKEN
-# from .utills import envbuild, save_user_history
-# import uuid
 
 def get_random_nickname():
     import random
@@ -25,22 +19,6 @@ def get_random_nickname():
         if not user_with_code:
             return random_name
         
-# def get_jwt_token(user_instance):
-#     from rest_framework_simplejwt.tokens import RefreshToken
-#     refresh_token = RefreshToken.for_user(user_instance)
-#     access_token = str(refresh_token.access_token)
-#     return str(refresh_token), access_token
-
-
-# @api_view(['GET'])
-# def get_provider(request):
-#     try:
-#         provider = MUM_T_SOCIAL_USER.objects.filter(MUM_T_USER_ID=request.user.id).get().MUM_PROVIDER
-#     except:
-#         provider = ''
-#     response_data = {'provider' : provider}
-#     return Response(response_data, status=status.HTTP_200_OK)
-
 
 @api_view(['POST'])
 def social_login(request, provider):

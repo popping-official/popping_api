@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from .models import User, SocialUser, UserGrade, AuthType, PointHistory, UserAddress
 from .utills import change_point
-
+from django.db.models import Sum, F
+from popup.models import Order
 
 class SignUpSerializer(serializers.ModelSerializer):
     
@@ -59,12 +60,14 @@ class UserSerializer(serializers.ModelSerializer):
             self.fields['socialLoginProvider'] = serializers.SerializerMethodField()
             self.fields['gradeInfo'] = serializers.SerializerMethodField()
             self.fields['point'] = serializers.SerializerMethodField()
+            self.fields['profileImage'] = serializers.CharField()
         
         elif self.method == 'patch':
             self.fields['isPopper'] = serializers.BooleanField()
             self.fields['nickname'] = serializers.CharField()   
             self.fields['name'] = serializers.CharField(required=False) 
             self.fields['isMale'] = serializers.BooleanField(required=False, allow_null=True) 
+            self.fields['profileImage'] = serializers.CharField(required=False, allow_blank=True)
     
     class Meta:
         model = User
@@ -98,8 +101,11 @@ class UserSerializer(serializers.ModelSerializer):
     def update_user(self, validated_data, user):
         is_popper = validated_data.get('isPopper')
         nickname = validated_data.get('nickname')
+        profile_image = validated_data.get('profileImage')
         
         user.nickname = nickname
+        if profile_image:
+            user.profileImage = profile_image
         
         if not is_popper:
             name = validated_data.get('name')
@@ -109,25 +115,68 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
     
     
-    
 class UserGradeSerializer(serializers.ModelSerializer):
     
+    minOrderAmount = serializers.SerializerMethodField()
+    maxOrderAmount = serializers.SerializerMethodField()
     earnRate = serializers.SerializerMethodField()
     discountRate = serializers.SerializerMethodField()
+    nextGradeInfo = serializers.SerializerMethodField()
+    gradeRatio = serializers.SerializerMethodField()
+    
+    def __init__(self, *args, **kwargs):
+        self.order_amount = kwargs.pop('order_amount', 0)
+        super().__init__(*args, **kwargs)
     
     class Meta:
         model = UserGrade
-        fields = ('grade', 'minOrderAmount', 'maxOrderAmount', 'earnRate', 'discountRate')
+        fields = ('grade', 'minOrderAmount', 'maxOrderAmount', 'earnRate', 'discountRate', 'nextGradeInfo', 'gradeRatio')
+    
+    def calculate_percentage(self, min_num, max_num, amount):
+        if min_num > max_num:
+            min_num, max_num = max_num, min_num  
         
+        if amount < min_num:
+            return 0.0  
+        elif amount > max_num:
+            return 100.0  
+
+        percentage = ((amount - min_num) / (max_num - min_num)) * 100
+        return round(percentage)
+    
     def convert_integer(self, float_num):
         return round(float_num * 100)
+    
+    def get_minOrderAmount(self, obj):
+        return "{:,}".format(obj.minOrderAmount)
+    
+    def get_maxOrderAmount(self, obj):
+        return "{:,}".format(obj.maxOrderAmount)
     
     def get_earnRate(self, obj):
         return self.convert_integer(obj.earnRate)
     
     def get_discountRate(self, obj):
-        return self.convert_integer(obj.discountRate)  
+        return self.convert_integer(obj.discountRate)
     
+    def get_nextGradeInfo(self, obj):
+        if obj.id == 1 or obj.id == 6:
+            # popper 혹은 gold 등급일 경우
+            return {}
+        next_id = obj.id + 1
+        next_grade = UserGrade.objects.get(pk=next_id)
+        next_amount = next_grade.minOrderAmount - 1
+        return {
+            'nextGrade' : next_grade.grade,
+            'nextMinOrderAmount' : "{:,}".format(next_amount),
+        }
+    
+    def get_gradeRatio(self, obj):
+        if obj.id == 1 or obj.id == 6:
+            return 100
+        min_num = obj.minOrderAmount
+        max_num = obj.maxOrderAmount
+        return self.calculate_percentage(min_num, max_num, self.order_amount)
     
 
 class MyPageSerializer(serializers.ModelSerializer):
@@ -149,7 +198,15 @@ class MyPageSerializer(serializers.ModelSerializer):
         return "{:,}".format(point_history.currentPoint)
     
     def get_gradeInfo(self, obj):
-        serializers = UserGradeSerializer(obj.gradeFK)
+        
+        order_amount = Order.objects.filter(userFK=obj, orderStatus=1).aggregate(
+            total=Sum(F('totalPrice'))
+        )['total']
+        
+        if not order_amount:
+            order_amount = 0
+        
+        serializers = UserGradeSerializer(obj.gradeFK, order_amount=order_amount)
         return serializers.data
     
     def get_followingNum(self, obj):
@@ -296,9 +353,72 @@ class UserManagementSerializer(serializers.ModelSerializer):
         user.set_password(newPassword)
         user.save()
         
-        return True
-
-
+        return True    
+    
+class PointHistorySerializer(serializers.ModelSerializer):
+    
+    changeCategory = serializers.CharField(source='PointChangeFK.changeInfo')
+    changePoint = serializers.SerializerMethodField()
+    changeAt = serializers.DateTimeField(source='createdAt', format='%Y.%m.%d')
+    
+    class Meta:
+        model = PointHistory
+        fields = ('changeCategory', 'changePoint', 'changeAt')
+    
+    def get_changePoint(self, obj):
+        
+        if obj.increasePoint:
+            # 증가의 경우
+            change_point = "{:,}".format(obj.increasePoint)
+            sign = '+'
+            
+        else:
+            # 감소의 경우
+            change_point = "{:,}".format(obj.decreasePoint)
+            sign = '+'
+        
+        return f'{sign}{change_point}'
+    
+class UserBenefitSerializer(serializers.ModelSerializer):
+    
+    point = serializers.SerializerMethodField()
+    orderAmount = serializers.SerializerMethodField()
+    gradeInfo = serializers.SerializerMethodField()
+    pointHistory = serializers.SerializerMethodField()
+    
+    
+    class Meta:
+        model = User
+        fields = ('point', 'orderAmount', 'gradeInfo', 'pointHistory')
+        depth = 1
+        
+    def get_point(self, obj):
+        point_history = PointHistory.objects.filter(userFK=obj).last()
+        if not point_history:
+            return 0
+        # 포인트를 천 단위로 구분하여 포맷
+        return "{:,}".format(point_history.currentPoint)
+    
+    def get_gradeInfo(self, obj):
+        
+        order_amount = Order.objects.filter(userFK=obj, orderStatus=1).aggregate(
+            total=Sum(F('totalPrice'))
+        )['total']
+        
+        if not order_amount:
+            order_amount = 0
+        
+        serializers = UserGradeSerializer(obj.gradeFK, order_amount=order_amount)
+        return serializers.data
+    
+    def get_pointHistory(self, obj):
+        point_history_queryset = PointHistory.objects.filter(userFK=obj).all()
+        serializers = PointHistorySerializer(point_history_queryset, many=True)
+        return serializers.data
+    
+    def get_orderAmount(self, obj):
+        order_amount = 0        
+        return "{:,}".format(order_amount)
 
 
 class UserAddressSerializers(serializers.ModelSerializer):
