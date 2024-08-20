@@ -70,6 +70,9 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
         null=True,
         blank=True
     )
+    profileImage = models.TextField(
+        default='/images/dummy/dummy_profile.jpg'
+    )
     authCode = models.CharField(
         # 인증번호용 컬럼
         max_length=8

@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from .models import User
-from .serializers import SignUpSerializer, UserSerializer, UserManagementSerializer, MyPageSerializer
+from .serializers import SignUpSerializer, UserSerializer, UserManagementSerializer, MyPageSerializer, UserBenefitSerializer
 import requests, json
 from pprint import pprint 
 from share.utills import envbuild
@@ -196,6 +196,7 @@ class UserAPI(APIView):
         user = request.user
         serializer = UserSerializer(data=request.data, method='patch')
         if not user or not serializer.is_valid():
+            print(serializer.errors)
             return Response(status=status.HTTP_400_BAD_REQUEST)
         serializer.update_user(serializer.validated_data, user)
         return Response(status=status.HTTP_200_OK)
@@ -276,4 +277,10 @@ class UserManagementAPI(APIView):
         
         is_success = serializer.update_password(validated_data=serializer.validated_data)
         return Response({ 'isSuccess' : is_success }, status=status.HTTP_200_OK)
-        
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def grade_point_info_api(request):
+    serializer = UserBenefitSerializer(request.user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
