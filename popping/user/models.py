@@ -206,7 +206,9 @@ class UserGrade(models.Model):
         # 할인률
         default=0
     )
-    
+    color = models.CharField(
+        max_length=7
+        )
 
 class PointChange(models.Model):
     changeInfo = models.CharField(
@@ -226,8 +228,12 @@ class UserAddress(models.Model):
     name = models.CharField(
         max_length=12,
         )
-    phoneNumber = models.IntegerField()
-    postNumber = models.IntegerField()
+    phoneNumber = models.CharField(
+        max_length=11
+        )
+    postNumber = models.CharField(
+        max_length=6
+        )
     address = models.TextField()
     detailAddress = models.TextField()
     default= models.BooleanField(default=False)

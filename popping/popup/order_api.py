@@ -11,9 +11,9 @@ from django.core.exceptions import ObjectDoesNotExist
 class OrderApi(APIView):
 	def get(self, request):
 		from .models import Order, Brands
-		from user.models import User, PointHistory, UserAddress
+		from user.models import User, PointHistory, UserAddress, UserGrade
 		from .main_serializers import PaymentDataSerializers
-		from user.serializers import UserAddressSerializers
+		from user.serializers import UserAddressSerializers, UserGradeSerializer
 
 		try:
 			oid = request.GET['oid']
@@ -43,6 +43,9 @@ class OrderApi(APIView):
 		response_data['order'] = PaymentDataSerializers(order_instance).data
 
 		response_data['address'] = UserAddressSerializers(UserAddress.objects.filter(userFK=user).order_by('-pk')[:5], many=True).data
+
+		response_data['grade'] = UserGradeSerializer(UserGrade.objects.exclude(pk=1), many=True).data
+		response_data['userGrade'] = UserGradeSerializer(user.gradeFK).data
 
 		return Response(response_data, status=status.HTTP_200_OK)
 

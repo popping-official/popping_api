@@ -135,7 +135,7 @@ class UserGradeSerializer(serializers.ModelSerializer):
     def calculate_percentage(self, min_num, max_num, amount):
         if min_num > max_num:
             min_num, max_num = max_num, min_num  
-        
+
         if amount < min_num:
             return 0.0  
         elif amount > max_num:
@@ -424,4 +424,9 @@ class UserBenefitSerializer(serializers.ModelSerializer):
 class UserAddressSerializers(serializers.ModelSerializer):
     class Meta:
         model = UserAddress
-        fields = ('addressName', 'name', 'phoneNumber', 'postNumber','address','detailAddress', 'default')
+        fields = ('id', 'addressName', 'name', 'phoneNumber', 'postNumber', 'address', 'detailAddress', 'default')
+
+    def create(self, validated_data):
+        user = self.context['user']
+        address_instance = UserAddress(userFK=user, **validated_data)
+        address_instance.save()
