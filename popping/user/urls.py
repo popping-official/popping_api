@@ -1,6 +1,5 @@
 from django.urls import path
-from .apis import signin_api, signout_api, duplicate_check_api, SignUpAPI, UserAPI, signup_email_send_api, check_business_registration_api, UserManagementAPI, MyPageAPI,\
-    grade_point_info_api
+from .apis import signin_api, signout_api, duplicate_check_api, SignUpAPI, UserAPI, signup_email_send_api, check_business_registration_api, UserManagementAPI, MyPageAPI, AddressAPI, grade_point_info_api
 from .social_auth import social_login
 
 urlpatterns = [
@@ -15,4 +14,5 @@ urlpatterns = [
     path('social/auth/<str:provider>', social_login, name='social_login'),
     path('mypage', MyPageAPI.as_view(), name='mypage'),
     path('benefit', grade_point_info_api, name='grade_point_info_api'),
+    path('address', AddressAPI.as_view(), name='address'),
 ]

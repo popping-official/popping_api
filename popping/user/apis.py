@@ -284,3 +284,97 @@ class UserManagementAPI(APIView):
 def grade_point_info_api(request):
     serializer = UserBenefitSerializer(request.user)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+class AddressAPI(APIView):
+    def get(self, request):
+        from .models import UserAddress, User
+        from .serializers import UserAddressSerializers
+
+        if request.user.is_anonymous:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            data = UserAddressSerializers(UserAddress.objects.get(pk=request.GET.get('id'))).data
+        except:
+            data = UserAddressSerializers(UserAddress.objects.filter(userFK=request.user).order_by('-pk')[:5], many=True).data
+
+        return Response(data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        from .models import UserAddress
+        from .serializers import UserAddressSerializers
+        if request.user.is_anonymous:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        context = {'user': request.user}
+
+        user_address_list = UserAddress.objects.filter(userFK=request.user)
+
+        if len(user_address_list) >= 5:
+            return Response({'message': f'제한 배송지 수를 넘었습니다.\n현재 배송지 수 : ({len(user_address_list)}개)'}, status=status.HTTP_400_BAD_REQUEST)
+        elif len(user_address_list) == 0:
+            request.data['default'] = True
+        serializer = UserAddressSerializers(data=request.data, context=context)
+
+        if serializer.is_valid():
+            if request.data['default']:
+                user_address_list.update(default=0)
+            serializer.create(serializer.validated_data)
+        else:
+            return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(status=status.HTTP_201_CREATED)
+
+    def put(self, request):
+        from .models import UserAddress
+
+        address_id = request.data.get('id')
+
+        address_instance: UserAddress = UserAddress.objects.get(pk=address_id)
+        address_all = UserAddress.objects.filter(userFK=request.user)
+
+        if request.data['default']:
+            address_all.update(default=0)
+
+        address_instance.address = request.data['address']
+        address_instance.addressName = request.data['addressName']
+        address_instance.detailAddress = request.data['detailAddress']
+        address_instance.name = request.data['name']
+        address_instance.phoneNumber = request.data['phoneNumber']
+        address_instance.postNumber = request.data['postNumber']
+        address_instance.default = request.data['default']
+
+        address_instance.save()
+
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    def patch(self, request):
+        from .models import UserAddress
+        if request.user.is_anonymous:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+        address_id = request.GET.get('id')
+
+        address_instance = UserAddress.objects.get(pk=address_id)
+        address_all = UserAddress.objects.filter(userFK=request.user)
+
+        address_all.update(default=0)
+        address_instance.default = 1
+        address_instance.save()
+
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    def delete(self, request):
+        from .models import UserAddress
+        if request.user.is_anonymous:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+        address_id = request.GET.get('id')
+
+        address_instance = UserAddress.objects.get(pk=address_id)
+
+        if address_instance.userFK.pk != request.user.pk:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        address_instance.delete()
+
+        return Response(status=status.HTTP_202_ACCEPTED)
