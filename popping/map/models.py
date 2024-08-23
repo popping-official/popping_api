@@ -49,6 +49,7 @@ class OfflinePopup(me.Document):
     meta = {
         'collection': 'OfflinePopup',
     }
+    brandName = me.StringField(required=True)
     title = me.StringField(required=True)
     url = me.StringField(required=True)
     date = me.DictField(required=True)
@@ -57,8 +58,8 @@ class OfflinePopup(me.Document):
     badge = me.ListField(me.StringField(),required=False)
     openTime = me.ListField(me.DictField(),required=False)
     description = me.ListField(me.StringField(),required=False)
-    image = me.ImageField(required=False)
-    homePage = me.StringField(required=True)
+    image = me.ListField(me.ImageField(),required=False)
+    homepage = me.StringField(required=True)
     sns = me.StringField(required=True)
     status = me.IntField(required=False, default=0)
     caption = me.StringField(required=True)
