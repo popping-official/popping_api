@@ -35,7 +35,7 @@ class OrderApi(APIView):
 
 		user: User = request.user
 
-		response_data['brand'] = Brands.objects.get(proceeding=1).name.upper()
+		response_data['brand'] = Brands.objects.get(proceeding=1).manager.nickname.upper()
 
 		point_history = PointHistory.objects.filter(userFK=user).last()
 		response_data['point'] = point_history.currentPoint
@@ -71,7 +71,6 @@ class OrderApi(APIView):
 		try:
 			order_instance.save()
 		except Exception as e:
-			print(e)
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 		cs_list = list()
 		for cart in cart_list:
@@ -89,7 +88,6 @@ class OrderApi(APIView):
 		try:
 			OrderCS.objects.bulk_create(cs_list)
 		except Exception as e:
-			print(e)
 			order_instance.delete()
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 

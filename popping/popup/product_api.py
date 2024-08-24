@@ -12,11 +12,17 @@ from django.core.exceptions import ObjectDoesNotExist
 @permission_classes([AllowAny])
 def product_data(request, brand, product):
 	from .models import Brands, Product
+	from user.models import User
 	from .main_serializers import ProductSerializer
 	context = {"user": request.user}
 
 	try:
-		brand_info: Brands = Brands.objects.get(name=brand)
+		manager = User.objects.get(nickname=brand, isPopper=True)
+	except:
+		return Response(status=status.HTTP_400_BAD_REQUEST)
+
+	try:
+		brand_info: Brands = Brands.objects.get(manager=manager)
 	except:
 		return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -42,7 +48,7 @@ class CartAPI(APIView):
 			return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 		response_data = dict()
-		response_data['brand'] = Brands.objects.get(proceeding=1).name.upper()
+		response_data['brand'] = Brands.objects.get(proceeding=1).manager.nickname.upper()
 
 		cart_query: Cart = Cart.objects.filter(userFK=request.user)
 		response_data['cart'] = CartSerializers(cart_query, many=True, context={'user': request.user}).data
