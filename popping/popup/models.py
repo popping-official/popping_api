@@ -11,12 +11,6 @@ class Brands(models.Model):
         on_delete=models.DO_NOTHING
         )
 
-    name = models.TextField(
-        # 브랜드의 이름
-        max_length=200,
-        unique=True,
-        )
-
     logo = models.URLField(
         # 브랜드의 로고
         null=True,
@@ -25,7 +19,6 @@ class Brands(models.Model):
 
     description = models.TextField(
     )
-
 
     conditions = models.JSONField(
         # 브랜드 계약 조건

@@ -13,11 +13,17 @@ from share.utills import error_response
 @permission_classes([AllowAny])
 def brand_data(request, name):
 	from .models import Brands
+	from user.models import User
 	from .main_serializers import BrandsSerializer
+
 	context = {"user": request.user}
+	try:
+		manager = User.objects.get(nickname=name, isPopper=True)
+	except:
+		return Response(status=status.HTTP_400_BAD_REQUEST)
 
 	try:
-		brand_info: Brands = Brands.objects.get(name=name)
+		brand_info: Brands = Brands.objects.get(manager=manager)
 	except:
 		return Response(status=status.HTTP_400_BAD_REQUEST)
 	return Response(BrandsSerializer(brand_info, context=context).data ,status=status.HTTP_200_OK)
@@ -25,15 +31,38 @@ def brand_data(request, name):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+def all_brand_data(request):
+	from .models import Brands
+	from .main_serializers import BrandSimpleSerializers
+
+	context = {"user": request.user}
+
+	try:
+		brand_info: Brands = Brands.objects.all()
+	except:
+		return Response(status=status.HTTP_400_BAD_REQUEST)
+
+	return Response(BrandSimpleSerializers(brand_info, context=context, many=True).data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def online_popup_store_main_data(request, name):
 	from .models import Brands, Product
+	from user.models import User
 	from .main_serializers import BrandsSerializer, ProductSerializer
 
 	response_data = dict()
 
 	context = {"user": request.user}
+
 	try:
-		brand_info: Brands = Brands.objects.get(name=name)
+		manager = User.objects.get(nickname=name, isPopper=True)
+	except:
+		return Response(status=status.HTTP_400_BAD_REQUEST)
+
+	try:
+		brand_info: Brands = Brands.objects.get(manager=manager)
 	except:
 		return Response(status=status.HTTP_400_BAD_REQUEST)
 

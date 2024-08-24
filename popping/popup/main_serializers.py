@@ -33,6 +33,7 @@ class UserSavedListSerializer(serializers.ModelSerializer):
 
 class BrandsSerializer(serializers.ModelSerializer):
     isSaved = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
 
     class Meta:
         model = Brands
@@ -45,6 +46,9 @@ class BrandsSerializer(serializers.ModelSerializer):
         except:
             return False
         return state
+
+    def get_name(self, obj: Brands):
+        return obj.manager.nickname
 
     def create(self, validated_data):
         return Brands.objects.create(**validated_data)
