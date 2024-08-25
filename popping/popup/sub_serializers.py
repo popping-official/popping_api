@@ -8,8 +8,8 @@ from map.serializers import LocationDictSerializer, Base64ImageField
 
 class BrandSimpleSerializers(serializers.ModelSerializer):
 	isSaved = serializers.SerializerMethodField()
-	contractEnd = serializers.DateTimeField(format='%Y년 %m월 %d일')
-	contractStart = serializers.DateTimeField(format='%Y년 %m월 %d일')
+	contractEnd = serializers.DateTimeField()
+	contractStart = serializers.DateTimeField()
 	proceeding = serializers.SerializerMethodField()
 	isAble = serializers.SerializerMethodField()
 	name = serializers.SerializerMethodField()

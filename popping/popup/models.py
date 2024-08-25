@@ -26,11 +26,6 @@ class Brands(models.Model):
         default=dict
         )
 
-    proceeding = models.BooleanField(
-        # 현재 온라인 팝업 진행 여부
-        default=False
-        )
-
     contractStart = models.DateTimeField(
         # 브랜드 계약 시작일
         null=True,
@@ -46,10 +41,12 @@ class Brands(models.Model):
     saved = models.IntegerField(
         default=0
         )
+    view = models.IntegerField(
+        default=0
+        )
     thumbnail = models.TextField(
 
         )
-
 
 
 # online popup's products
