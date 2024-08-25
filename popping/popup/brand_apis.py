@@ -19,7 +19,8 @@ def brand_data(request, name):
 	context = {"user": request.user}
 	try:
 		manager = User.objects.get(nickname=name, isPopper=True)
-	except:
+	except Exception as e:
+		print(e)
 		return Response(status=status.HTTP_400_BAD_REQUEST)
 
 	try:
@@ -38,7 +39,7 @@ def all_brand_data(request):
 	context = {"user": request.user}
 
 	try:
-		brand_info: Brands = Brands.objects.all()
+		brand_info: Brands = Brands.objects.all().order_by('-pk')
 	except:
 		return Response(status=status.HTTP_400_BAD_REQUEST)
 
