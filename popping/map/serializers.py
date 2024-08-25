@@ -1,9 +1,7 @@
 from rest_framework import serializers
-from .models import PopupStore
 from user.models import User
 import base64
 from django.core.files.base import ContentFile
-
 
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
@@ -20,34 +18,15 @@ class Base64ImageField(serializers.ImageField):
             return base64.b64encode(value.read()).decode('utf-8')
         return None
 
-
 class LocationDictSerializer(serializers.Serializer):
     address = serializers.CharField(max_length=200)
     placeName = serializers.CharField(max_length=100)
     geoData = serializers.JSONField(required=False)
 
-
-class PopupStoreSerializer(serializers.Serializer):
-    id = serializers.CharField(max_length=200)
-    title = serializers.CharField(max_length=200)
-    location = LocationDictSerializer(required=False)
-    startDate = serializers.DateTimeField(required=False)
-    endDate = serializers.DateTimeField(required=False)
-    openTime = serializers.ListField(child=serializers.CharField(), required=False)
-    event = serializers.ListField(child=serializers.CharField(), required=False)
-    isSaved = serializers.SerializerMethodField(required=False)
-    image = Base64ImageField(required=False)
-    view = serializers.IntegerField()
-    saved = serializers.IntegerField()
+class DateDictSerializer(serializers.Serializer):
+    start = serializers.DateTimeField(required=False)
+    end = serializers.DateTimeField(required=False)
     
-    def get_isSaved(self, obj):
-        user: User = self.context.get('user')
-        try:
-            return str(obj.id) in user.savedPopup
-        except:
-            return False
-
-
 class PlaceSerializer(serializers.Serializer):
     # id = serializers.CharField(max_length=200)
     # id = serializers.CharField(source='_id', read_only=True)
@@ -66,4 +45,79 @@ class PlaceSerializer(serializers.Serializer):
     #     ret = super().to_representation(instance)
     #     ret['id'] = str(ret['id'])  # ObjectId를 문자열로 변환
     #     return ret
+    
+class OfflinePopupStoreSimpleSerializer(serializers.Serializer):
+    # id = serializers.CharField(source='_id',max_length=200)
+    id = serializers.SerializerMethodField()
+    title = serializers.CharField(max_length=200)
+    location = LocationDictSerializer(required=False)
+    description = serializers.ListField(child=serializers.CharField(), required=False)
+    isSaved = serializers.SerializerMethodField(required=False)
+    image = serializers.SerializerMethodField(required=False)
+    # viewCount = serializers.IntegerField()
+    viewCount = serializers.SerializerMethodField()
+    
+    def get_id(self, obj):
+        try:
+            id = str(obj.id)
+        except:
+            id = str(obj.get('_id'))
+            
+        return id
+    
+    def get_image(self, obj):
+        try:
+            img_id = str(obj.image[0].grid_id)
+        except:
+            img_id = str(obj.get('image')[0])
+        
+        return img_id
+    
+    def get_viewCount(self,obj):
+        try:
+            viewCount = obj.viewCount
+        except:
+            viewCount = obj.get('viewCount')
+            
+        return viewCount
+    
+    def get_isSaved(self, obj):
+        user: User = self.context.get('user')
+        try:
+            return str(obj.id) in user.savedPopup
+        except:
+            return False
+        
+class OfflinePopupStoreSerializer(serializers.Serializer):
+    id = serializers.CharField(max_length=200)
+    brandName = serializers.CharField(max_length=200)
+    title = serializers.CharField(max_length=200)
+    location = LocationDictSerializer(required=False)
+    date = DateDictSerializer(required=False)
+    openTime = serializers.ListField(child=serializers.JSONField(), required=False)
+    description = serializers.ListField(child=serializers.CharField(), required=False)
+    isSaved = serializers.SerializerMethodField(required=False)
+    image = serializers.SerializerMethodField(required=False)
+    homepage = serializers.CharField(max_length=200)
+    sns = serializers.CharField(max_length=200)
+    # view = serializers.IntegerField()
+    # saved = serializers.IntegerField()
+    
+    def get_image(self, obj):
+        images = []
+        
+        for img in obj.image:
+            
+            images.append(str(img.grid_id)) 
+        
+        return images
+    
+    def get_isSaved(self, obj):
+        user: User = self.context.get('user')
+        try:
+            return str(obj.id) in user.savedPopup
+        except:
+            return False
+
+
     

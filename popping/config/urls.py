@@ -22,4 +22,5 @@ urlpatterns = [
     path('api/user/', include('user.urls')),
     path('api/maps/', include('map.urls')),
     path('api/popup/', include('popup.urls')),
+    path('api/share/', include('share.urls')),
     ]
