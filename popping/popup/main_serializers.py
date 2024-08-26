@@ -7,8 +7,6 @@ from .sub_serializers import BrandSimpleSerializers, ProductSimpleSerializers, P
 
 from user.models import User
 
-
-from map.serializers import PopupStoreSerializer
 from map.models import PopupStore
 
 class UserSavedListSerializer(serializers.ModelSerializer):
