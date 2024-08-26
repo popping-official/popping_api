@@ -28,7 +28,6 @@ def signin_api(request):
         serializer = UserSerializer(user, method='get')
         temp_data = serializer.data
         temp_data['isLogin'] = True
-        
         response_body = {
             'user' : temp_data
         }
@@ -279,11 +278,14 @@ class UserManagementAPI(APIView):
         return Response({ 'isSuccess' : is_success }, status=status.HTTP_200_OK)
 
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def grade_point_info_api(request):
     serializer = UserBenefitSerializer(request.user)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 
 class AddressAPI(APIView):
     def get(self, request):
@@ -378,3 +380,26 @@ class AddressAPI(APIView):
         address_instance.delete()
 
         return Response(status=status.HTTP_202_ACCEPTED)
+
+
+
+class AccountChangeAPI(APIView):
+    
+    def post(self, request):
+        user = request.user
+        if user.isPopper:
+            # popper => popple
+            user.isPopper = False
+        else:
+            # popple => popper
+            user.isPopper = True
+        user.save()
+        
+        serializer = UserSerializer(user, method='get')
+        temp_data = serializer.data
+        temp_data['isLogin'] = True
+        response_body = {
+            'user' : temp_data
+        }
+        
+        return Response(response_body, status=status.HTTP_200_OK)
