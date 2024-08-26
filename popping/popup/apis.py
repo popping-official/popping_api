@@ -20,7 +20,7 @@ def user_follow_save_toggle(request) -> Response:
 	'''
 	from user.models import User
 	from .models import Brands, Product
-	from map.models import PopupStore
+	from map.models import OfflinePopup
 
 	if request.user.is_anonymous:
 		return Response(status=status.HTTP_401_UNAUTHORIZED)
@@ -32,7 +32,7 @@ def user_follow_save_toggle(request) -> Response:
 	toggle_mapping = {
 		'Brands': (user_info.followed, Brands),
 		'Product': (user_info.savedProduct, Product),
-		'Popup': (user_info.savedPopup, PopupStore)
+		'Popup': (user_info.savedPopup, OfflinePopup)
 		}
 
 	toggle_type = request.data.get('type', 'Brands')
@@ -83,16 +83,16 @@ def user_follow_save_toggle(request) -> Response:
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def test_function_mongodb(request) -> Response:
-	from map.models import PopupStore
-	from map.serializers import PopupStoreSerializer
+	from map.models import OfflinePopup
+	from map.serializers import OfflinePopupStoreSerializer
 	if request.user.is_anonymous:
 		return Response(status.HTTP_401_UNAUTHORIZED)
 
 	context = {"user": request.user}
 
-	popupStore_query = PopupStore.objects()
+	popupStore_query = OfflinePopup.objects()
 
-	serializer = PopupStoreSerializer(popupStore_query, many=True, context=context)
+	serializer = OfflinePopupStoreSerializer(popupStore_query, many=True, context=context)
 
 	response_data = {
 		'popupStores': serializer.data
