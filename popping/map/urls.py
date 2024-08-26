@@ -1,11 +1,11 @@
 # map/urls.py
 from django.urls import path
-from .apis import store_list, daco_crawling, geo_addr, surround_place
+from .apis import surround_place, offline_popups, popup_detail, count_view, surround_popup
 
 urlpatterns = [
-    # path('geo-addr/<str:addr>', geocode_addr, name='duplicate'),
-    path('crawling', daco_crawling, name='crawling'),
-    path('geocode', geo_addr, name='geo_addr'),
-    path('stores', store_list, name='map-list'),
-    path('surround', surround_place, name='surround'),
+    path('off-popups', offline_popups, name='off-popup'),
+    path('popup/<str:popupId>', popup_detail, name='popup'),
+    path('surround-place', surround_place, name='surround-place'),
+    path('surround-popup', surround_popup, name='surround-popup'),
+    path('view-count/<str:popupId>', count_view, name='view-count'),
 ]
