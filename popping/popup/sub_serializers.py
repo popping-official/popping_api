@@ -94,13 +94,23 @@ class OrderCSSerializers(serializers.ModelSerializer):
 class BrandManageSerializer(serializers.ModelSerializer):
     
     def __init__(self, *args, **kwargs):
-        self.method = kwargs.pop('method', 0)
+        self.method = kwargs.pop('method', 'GET')
         super().__init__(*args, **kwargs)
         
-        if self.method == 'post':
+        if self.method == 'GET':
+            self.fields['id'] = serializers.IntegerField()
             self.fields['logo'] = serializers.CharField()
             self.fields['thumbnail'] = serializers.CharField()
             self.fields['description'] = serializers.CharField()
+            
+        elif self.method == 'POST' or self.method == 'PATCH':
+            self.fields['logo'] = serializers.CharField()
+            self.fields['thumbnail'] = serializers.CharField()
+            self.fields['description'] = serializers.CharField()
+        
+            if self.method == 'PATCH':
+                self.fields['brandId'] = serializers.IntegerField()
+        
         
     class Meta:
         model = Brands
@@ -113,3 +123,8 @@ class BrandManageSerializer(serializers.ModelSerializer):
         brand.save()
         return brand
     
+    def update(self, validated_data):
+        brand_id = validated_data['brandId']
+        del validated_data['brandId']
+        brand_query = Brands.objects.filter(pk=brand_id)
+        brand_query.update(**validated_data)

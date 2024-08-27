@@ -386,10 +386,15 @@ class AddressAPI(APIView):
 class AccountChangeAPI(APIView):
     
     def post(self, request):
+        from popup.models import Brands
+        
         user = request.user
         if user.isPopper:
             # popper => popple
             user.isPopper = False
+            brand = Brands.objects.filter(manager=request.user).first()
+            if brand:
+                brand.delete()
         else:
             # popple => popper
             user.isPopper = True
