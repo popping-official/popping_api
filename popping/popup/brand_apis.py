@@ -78,7 +78,7 @@ class BrandManagementAPI(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get(self, request):
-        from .main_serializers import BrandsSerializer
+        from .sub_serializers import BrandManageSerializer
         from .models import Brands
         response_data = {}
         
@@ -90,8 +90,7 @@ class BrandManagementAPI(APIView):
         if not brand_info:
             response_data['isExist'] = False
         else:
-            context = {"user": request.user}
-            serializer = BrandsSerializer(brand_info, context=context)
+            serializer = BrandManageSerializer(brand_info)
             response_data['isExist'] = True
             response_data['brandData'] = serializer.data
             
@@ -100,7 +99,7 @@ class BrandManagementAPI(APIView):
     def post(self, request):
         from .sub_serializers import BrandManageSerializer
         
-        serializer = BrandManageSerializer(data=request.data, method='post')
+        serializer = BrandManageSerializer(data=request.data, method=request.method)
         if not serializer.is_valid():
             return Response(status=status.HTTP_400_BAD_REQUEST)
         
@@ -111,5 +110,11 @@ class BrandManagementAPI(APIView):
         return Response(status=status.HTTP_201_CREATED)
     
     def patch(self, request):
-        pass
+        from .sub_serializers import BrandManageSerializer
         
+        serializer = BrandManageSerializer(data=request.data, method=request.method)
+        if not serializer.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer.update(serializer.validated_data)
+        
+        return Response(status=status.HTTP_200_OK)
