@@ -29,7 +29,7 @@ class OfflinePopup(me.Document):
     sns = me.StringField(required=False)
     status = me.IntField(required=False, default=0)
     viewCount = me.IntField(default=0)
-    # caption = me.StringField(required=False)
+    saveCount = me.IntField(default=0)
 
 class Place(me.Document):
     meta = {
@@ -50,5 +50,6 @@ class Place(me.Document):
     charTag = me.ListField(me.StringField(),required=True)
     geoData = me.PointField(required=False)  # GeoJSON 포인트 형식의 위치 정보
     image = me.ImageField(required=False)
+    viewCount = me.IntField(required=False, default=0)
 
 
