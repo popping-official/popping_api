@@ -1,8 +1,7 @@
-from django.core.exceptions import ObjectDoesNotExist
-
+from rest_framework.views import APIView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-
+from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -74,3 +73,48 @@ def online_popup_store_main_data(request, name):
 
 	return Response(response_data,status=status.HTTP_200_OK)
 
+
+class BrandManagementAPI(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request):
+        from .sub_serializers import BrandManageSerializer
+        from .models import Brands
+        response_data = {}
+        
+        if not request.user.isPopper:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        
+        brand_info: Brands | None = Brands.objects.filter(manager=request.user).first()
+        
+        if not brand_info:
+            response_data['isExist'] = False
+        else:
+            serializer = BrandManageSerializer(brand_info)
+            response_data['isExist'] = True
+            response_data['brandData'] = serializer.data
+            
+        return Response(response_data, status=status.HTTP_200_OK)
+    
+    def post(self, request):
+        from .sub_serializers import BrandManageSerializer
+        
+        serializer = BrandManageSerializer(data=request.data, method=request.method)
+        if not serializer.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        validated_date = serializer.validated_data
+        validated_date['user'] = request.user
+        serializer.create(validated_date)
+        
+        return Response(status=status.HTTP_201_CREATED)
+    
+    def patch(self, request):
+        from .sub_serializers import BrandManageSerializer
+        
+        serializer = BrandManageSerializer(data=request.data, method=request.method)
+        if not serializer.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer.update(serializer.validated_data)
+        
+        return Response(status=status.HTTP_200_OK)

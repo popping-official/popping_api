@@ -9,44 +9,40 @@ class Brands(models.Model):
     manager = models.ForeignKey(
         'user.User',
         on_delete=models.DO_NOTHING
-        )
+    )
 
-    logo = models.URLField(
+    logo = models.TextField(
         # 브랜드의 로고
         null=True,
         blank=True
-        )
-
+    )
     description = models.TextField(
     )
-
     conditions = models.JSONField(
         # 브랜드 계약 조건
         # 수수료, 등등
         default=dict
-        )
-
+    )
     contractStart = models.DateTimeField(
         # 브랜드 계약 시작일
         null=True,
         blank=True
-        )
-
+    )
     contractEnd = models.DateTimeField(
         # 브랜드 계약 만료일
         null=True,
         blank=True
-        )
-
+    )
     saved = models.IntegerField(
         default=0
-        )
+    )
     view = models.IntegerField(
         default=0
-        )
+    )
     thumbnail = models.TextField(
-
-        )
+        null=True,
+        blank=True
+    )
 
 
 # online popup's products
@@ -72,13 +68,13 @@ class Product(TimeModel):
     )
     saved = models.IntegerField(
         default=0
-        )
+    )
     view = models.IntegerField(
         default=0
-        )
+    )
     thumbnail = models.TextField(
 
-        )
+    )
 
 
 # order list
@@ -152,17 +148,12 @@ class Tracking(TimeModel):
 class Courier(models.Model):
     name = models.CharField(
         max_length=100
-        )
+    )
 
     url = models.URLField(
         null=True,
         blank=True
-        )
-
-
-
-
-
+    )
 
 # order customer service
 class OrderCS(TimeModel):
@@ -185,7 +176,7 @@ class OrderCS(TimeModel):
     delivery = models.JSONField(
         null=True,
         blank=True
-        )
+    )
 
 
 
@@ -202,4 +193,4 @@ class Cart(TimeModel):
 
     option = models.JSONField(
         default=dict
-        )
+    )
