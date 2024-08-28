@@ -2,6 +2,8 @@ from rest_framework import serializers
 from user.models import User
 import base64
 from django.core.files.base import ContentFile
+import gridfs
+from map.mongodb import MongoDBClient
 
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
@@ -57,6 +59,8 @@ class OfflinePopupStoreSimpleSerializer(serializers.Serializer):
     # viewCount = serializers.IntegerField()
     viewCount = serializers.SerializerMethodField()
     
+    
+    
     def get_id(self, obj):
         try:
             id = str(obj.id)
@@ -66,12 +70,18 @@ class OfflinePopupStoreSimpleSerializer(serializers.Serializer):
         return id
     
     def get_image(self, obj):
-        try:
-            img_id = str(obj.image[0].grid_id)
-        except:
-            img_id = str(obj.get('image')[0])
+        db = MongoDBClient.get_database('poppingmongo')
+        fs = gridfs.GridFS(db)
         
-        return img_id
+        try:
+            # img_id = str(obj.image[0].grid_id)
+            file = fs.get(obj.image[0].grid_id)
+        except:
+            # img_id = str(obj.get('image')[0])
+            file = fs.get(obj.get('image')[0])
+            
+        encoded_img = base64.b64encode(file.read()).decode('utf-8')
+        return encoded_img
     
     def get_viewCount(self,obj):
         try:
