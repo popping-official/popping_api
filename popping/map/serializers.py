@@ -4,6 +4,8 @@ import base64
 from django.core.files.base import ContentFile
 import gridfs
 from map.mongodb import MongoDBClient
+from django.core.cache import cache
+from bson import ObjectId
 
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
@@ -70,17 +72,25 @@ class OfflinePopupStoreSimpleSerializer(serializers.Serializer):
         return id
     
     def get_image(self, obj):
+        
         db = MongoDBClient.get_database('poppingmongo')
         fs = gridfs.GridFS(db)
         
         try:
-            # img_id = str(obj.image[0].grid_id)
-            file = fs.get(obj.image[0].grid_id)
+            img_id = str(obj.image[0].grid_id)
         except:
-            # img_id = str(obj.get('image')[0])
-            file = fs.get(obj.get('image')[0])
+            img_id = str(obj.get('image')[0])
             
-        encoded_img = base64.b64encode(file.read()).decode('utf-8')
+        cache_key = f"popup_image_{img_id}"
+        encoded_img = cache.get(cache_key)
+        
+        if not encoded_img:
+            print('캐시 저장')
+            file = fs.get(ObjectId(img_id))
+            
+            encoded_img = base64.b64encode(file.read()).decode('utf-8')
+            cache.set(cache_key, encoded_img, timeout=60*60*24)  # 24시간 동안 캐시
+            
         return encoded_img
     
     def get_viewCount(self,obj):
@@ -110,15 +120,30 @@ class OfflinePopupStoreSerializer(serializers.Serializer):
     image = serializers.SerializerMethodField(required=False)
     homepage = serializers.CharField(max_length=200)
     sns = serializers.CharField(max_length=200)
+    viewCount = serializers.SerializerMethodField()
     # view = serializers.IntegerField()
     # saved = serializers.IntegerField()
     
     def get_image(self, obj):
+        db = MongoDBClient.get_database('poppingmongo')
+        fs = gridfs.GridFS(db)
+        
         images = []
         
         for img in obj.image:
+            img_id = str(img.grid_id)
+                
+            cache_key = f"popup_image_{img_id}"
+            encoded_img = cache.get(cache_key)
             
-            images.append(str(img.grid_id)) 
+            if not encoded_img:
+                print('캐시 저장')
+                file = fs.get(img.grid_id)
+                
+                encoded_img = base64.b64encode(file.read()).decode('utf-8')
+                cache.set(cache_key, encoded_img, timeout=60*60*24)  # 24시간 동안 캐시
+                
+            images.append(encoded_img) 
         
         return images
     
@@ -128,6 +153,49 @@ class OfflinePopupStoreSerializer(serializers.Serializer):
             return str(obj.id) in user.savedPopup
         except:
             return False
+    
+    def get_viewCount(self,obj):
+        try:
+            viewCount = obj.viewCount
+        except:
+            viewCount = obj.get('viewCount')
+            
+        return viewCount
+        
+class MainPopupSerializer(serializers.Serializer):
+    id = serializers.SerializerMethodField()
+    title = serializers.CharField(max_length=200)
+    location = LocationDictSerializer(required=False)
+    image = serializers.SerializerMethodField(required=False)
 
+    def get_id(self, obj):
+        try:
+            id = str(obj.id)
+        except:
+            id = str(obj.get('_id'))
+            
+        return id
+    
+    def get_image(self, obj):
+        
+        db = MongoDBClient.get_database('poppingmongo')
+        fs = gridfs.GridFS(db)
+        
+        try:
+            img_id = str(obj.image[0].grid_id)
+        except:
+            img_id = str(obj.get('image')[0])
+            
+        cache_key = f"popup_image_{img_id}"
+        encoded_img = cache.get(cache_key)
+        
+        if not encoded_img:
+            print('캐시 저장')
+            file = fs.get(ObjectId(img_id))
+            
+            encoded_img = base64.b64encode(file.read()).decode('utf-8')
+            cache.set(cache_key, encoded_img, timeout=60*60*24)  # 24시간 동안 캐시
+            
+        return encoded_img
 
     
