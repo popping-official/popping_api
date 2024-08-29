@@ -26,37 +26,37 @@ def main_popup(request):
         {
             "$match": {
                 "status": 1
-                }
-            },
+            }
+        },
         {
             "$addFields": {
                 "calculated_value": {
                     "$add": [
-                        {"$multiply": ["$saveCount", 3]},
+                        {"$multiply": [{"$ifNull": ["$saveCount", 0]}, 3]},
                         {"$ifNull": ["$viewCount", 0]}
-                        ]
-                    }
+                    ]
                 }
-            },
+            }
+        },
         {
             "$match": {
                 "$expr": {
                     "$and": [
                         {"$ne": ["$calculated_value", 0]},
                         {"$ne": ["$calculated_value", None]}
-                        ]
-                    }
+                    ]
                 }
-            },
+            }
+        },
         {
             "$sort": {
                 "calculated_value": -1
-                }
-            },
+            }
+        },
         {
             "$limit": 9
-            }
-        ]
+        }
+    ]
 
     date_pipeline = [
         {
@@ -244,15 +244,16 @@ def popup_detail(request, popupId):
 @permission_classes([AllowAny])
 def count_view(request, popupId):
     
-    option = request.GET.get('option')
+    # option = request.GET.get('option')
     
-    match option:
+    # match option:
         
-        case "popup":
-            data_query = OfflinePopup.objects.get(id=popupId)
-        case "place":
-            data_query = Place.objects.get(id=popupId)
-            
+    #     case "popup":
+    #         data_query = OfflinePopup.objects.get(id=popupId)
+    #     case "place":
+    #         data_query = Place.objects.get(id=popupId)
+    
+    data_query = OfflinePopup.objects.get(id=popupId)            
     data_query.viewCount = data_query.viewCount + 1
     data_query.save()  # 변경된 내용을 저장
     
