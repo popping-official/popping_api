@@ -41,7 +41,15 @@ def signin_api(request):
 @permission_classes([IsAuthenticated])
 def signout_api(request):
     logout(request)
-    return Response(status=status.HTTP_200_OK)
+    # return Response(status=status.HTTP_200_OK)
+    
+    response = Response(status=status.HTTP_200_OK)
+
+    # 프론트엔드 쿠키에 있는 sessionid를 삭제하기 위해 쿠키 만료 설정
+    response.delete_cookie('sessionid')
+
+    return response
+
 
 
 @api_view(['POST'])
