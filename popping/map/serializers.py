@@ -36,14 +36,37 @@ class PlaceSerializer(serializers.Serializer):
     # id = serializers.CharField(source='_id', read_only=True)
     title = serializers.CharField(max_length=200)
     bestMenu = serializers.ListField(child=serializers.CharField(), required=False)
-    gradePoint = serializers.IntegerField()
+    # gradePoint = serializers.IntegerField()
     loadAddr = serializers.CharField(max_length=200)
-    numberAddr = serializers.CharField(max_length=200)
-    telNumber = serializers.CharField(max_length=200)
+    # numberAddr = serializers.CharField(max_length=200)
+    # telNumber = serializers.CharField(max_length=200)
     option = serializers.CharField(max_length=200)
-    charTag = serializers.ListField(child=serializers.CharField(), required=False)
-    tags = serializers.ListField(child=serializers.CharField(), required=False)
+    # charTag = serializers.ListField(child=serializers.CharField(), required=False)
+    # tags = serializers.ListField(child=serializers.CharField(), required=False)
     geoData = serializers.JSONField(required=False)
+    image = serializers.SerializerMethodField(required=False)
+    distance = serializers.IntegerField(required=False)
+    
+    def get_image(self, obj):
+        
+        db = MongoDBClient.get_database('poppingmongo')
+        fs = gridfs.GridFS(db)
+        
+        try:
+            img_id = str(obj.img.grid_id)
+        except:
+            img_id = str(obj.get('img'))
+            
+        cache_key = f"popup_image_{img_id}"
+        encoded_img = cache.get(cache_key)
+        
+        if not encoded_img:
+            file = fs.get(ObjectId(img_id))
+            
+            encoded_img = base64.b64encode(file.read()).decode('utf-8')
+            cache.set(cache_key, encoded_img, timeout=60*60*24)  # 24시간 동안 캐시
+            
+        return encoded_img
     
     # def to_representation(self, instance):
     #     ret = super().to_representation(instance)
@@ -60,8 +83,6 @@ class OfflinePopupStoreSimpleSerializer(serializers.Serializer):
     image = serializers.SerializerMethodField(required=False)
     # viewCount = serializers.IntegerField()
     viewCount = serializers.SerializerMethodField()
-    
-    
     
     def get_id(self, obj):
         try:

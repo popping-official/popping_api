@@ -6,12 +6,11 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
+from mongoengine.queryset.visitor import Q
 from config.settings import MONGO_DB_NAME
 from .models import OfflinePopup, Place
 from .serializers import PlaceSerializer, OfflinePopupStoreSerializer, OfflinePopupStoreSimpleSerializer, MainPopupSerializer
 from .mongodb import MongoDBClient
-from tqdm import tqdm
-import json
 from bson import ObjectId
 from datetime import datetime
 
@@ -26,37 +25,37 @@ def main_popup(request):
         {
             "$match": {
                 "status": 1
-                }
-            },
+            }
+        },
         {
             "$addFields": {
                 "calculated_value": {
                     "$add": [
-                        {"$multiply": ["$saveCount", 3]},
+                        {"$multiply": [{"$ifNull": ["$saveCount", 0]}, 3]},
                         {"$ifNull": ["$viewCount", 0]}
-                        ]
-                    }
+                    ]
                 }
-            },
+            }
+        },
         {
             "$match": {
                 "$expr": {
                     "$and": [
                         {"$ne": ["$calculated_value", 0]},
                         {"$ne": ["$calculated_value", None]}
-                        ]
-                    }
+                    ]
                 }
-            },
+            }
+        },
         {
             "$sort": {
                 "calculated_value": -1
-                }
-            },
+            }
+        },
         {
             "$limit": 9
-            }
-        ]
+        }
+    ]
 
     date_pipeline = [
         {
@@ -107,17 +106,23 @@ def offline_popups(request):
     
     sort_option = request.GET.get('sorted')
     district = request.GET.get('district')
+    search = request.GET.get('search')
     
     # 모든 PopupStore 문서를 조회
     popupStore_query = OfflinePopup.objects.filter(status=1)
     
     # 자치구 필터링    
     if district:
-        # location.address 필드에서 district를 포함하는 문서만 필터링합니다
+        # location.address 필드에서 district를 포함하는 문서만 필터링
         popupStore_query = popupStore_query.filter(
             location__address__icontains=district
         )
 
+    if search:
+        # title 필드에 search가 포함되거나, badge 배열에 search가 포함된 문서만 필터링
+        popupStore_query = popupStore_query.filter(
+            Q(title__icontains=search) | Q(tag__in=[search])
+        )
     # 정렬
     match sort_option:
         case "distance":
@@ -204,19 +209,21 @@ def surround_place(request):
     
     collection = MongoDBClient.get_collection(MONGO_DB_NAME,'Place')
     
-    query = {
-        "geoData": {
-            "$near": {
-                "$geometry": {
+    pipeline = [
+        {
+            "$geoNear": {
+                "near": {
                     "type": "Point",
                     "coordinates": [longitude, latitude]
                 },
-                "$maxDistance": radius_in_meters
+                "distanceField": "distance",  # 거리 계산 결과를 저장할 필드
+                "maxDistance": radius_in_meters,
+                "spherical": True
             }
-        }
-    }
-    nearby_locations = list(collection.find(query))
+        },
+    ]
     
+    nearby_locations = list(collection.aggregate(pipeline))
     serializer = PlaceSerializer(nearby_locations, many=True)
     response_data = {
         'place':serializer.data
@@ -244,15 +251,16 @@ def popup_detail(request, popupId):
 @permission_classes([AllowAny])
 def count_view(request, popupId):
     
-    option = request.GET.get('option')
+    # option = request.GET.get('option')
     
-    match option:
+    # match option:
         
-        case "popup":
-            data_query = OfflinePopup.objects.get(id=popupId)
-        case "place":
-            data_query = Place.objects.get(id=popupId)
-            
+    #     case "popup":
+    #         data_query = OfflinePopup.objects.get(id=popupId)
+    #     case "place":
+    #         data_query = Place.objects.get(id=popupId)
+    
+    data_query = OfflinePopup.objects.get(id=popupId)            
     data_query.viewCount = data_query.viewCount + 1
     data_query.save()  # 변경된 내용을 저장
     
