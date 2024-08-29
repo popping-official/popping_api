@@ -59,7 +59,8 @@ INSTALLED_APPS = [
     'user',
     'share',
     'popup',
-    'map'
+    'map',
+    'register',
 ]
 
 MONGO_DB_NAME = env('MONGO_DB_NAME')

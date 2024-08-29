@@ -55,20 +55,20 @@ def user_follow_save_toggle(request) -> Response:
 	if toggle_type == 'Popup':
 		if id in toggle:
 			toggle.remove(id)
-			info.saved -= 1
+			info.saveCount -= 1
 			toggle_status = False
 		else:
 			toggle.append(id)
-			info.saved += 1
+			info.saveCount += 1
 			toggle_status = True
 	else:
 		if toggle.filter(id=info.pk).exists():
 			toggle.remove(info)
-			info.saved -= 1
+			info.saveCount -= 1
 			toggle_status = False
 		else:
 			toggle.add(info)
-			info.saved += 1
+			info.saveCount += 1
 			toggle_status = True
 
 	user_info.save()

@@ -19,45 +19,45 @@ from datetime import datetime
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def main_popup(request):
-    response_data = {}
     now = datetime.utcnow()
     collection = MongoDBClient.get_collection(MONGO_DB_NAME,'OfflinePopup')
-    
+
     popularity_pipeline = [
-         {
+        {
             "$match": {
                 "status": 1
-            }
-        },
+                }
+            },
         {
             "$addFields": {
                 "calculated_value": {
                     "$add": [
                         {"$multiply": ["$saveCount", 3]},
-                        "$viewCount"
-                    ]
+                        {"$ifNull": ["$viewCount", 0]}
+                        ]
+                    }
                 }
-            }
-        },
+            },
         {
             "$match": {
                 "$expr": {
                     "$and": [
                         {"$ne": ["$calculated_value", 0]},
                         {"$ne": ["$calculated_value", None]}
-                    ]
+                        ]
+                    }
                 }
-            }
-        },
+            },
         {
             "$sort": {
                 "calculated_value": -1
-            }
-        },
+                }
+            },
         {
             "$limit": 9
-        }
-    ]
+            }
+        ]
+
     date_pipeline = [
         {
             "$match": {
@@ -85,6 +85,7 @@ def main_popup(request):
 
     # 집계 실행
     popularity_query = list(collection.aggregate(popularity_pipeline))
+    print(popularity_query)
     date_query = list(collection.aggregate(date_pipeline))
     
     popularity_serializer = MainPopupSerializer(popularity_query, many=True)

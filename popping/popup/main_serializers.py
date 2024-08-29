@@ -8,6 +8,7 @@ from .sub_serializers import BrandSimpleSerializers, ProductSimpleSerializers, P
 from user.models import User
 
 from map.models import OfflinePopup
+from bson import ObjectId
 
 class UserSavedListSerializer(serializers.ModelSerializer):
     brands = serializers.SerializerMethodField()
@@ -25,7 +26,8 @@ class UserSavedListSerializer(serializers.ModelSerializer):
         return ProductSimpleSerializers(obj.savedProduct.all(), many=True, context={'user': obj}).data
 
     def get_popups(self, obj: User):
-        queryset = OfflinePopup.objects.filter(pk__in=obj.savedPopup)
+        saved_popup_ids = [ObjectId(id_str) for id_str in obj.savedPopup]
+        queryset = OfflinePopup.objects(id__in=saved_popup_ids)
         return PopupStoreSimpleSerializer(queryset, many=True, context={'user': obj}).data
 
 
