@@ -85,7 +85,6 @@ class OfflinePopupStoreSimpleSerializer(serializers.Serializer):
         encoded_img = cache.get(cache_key)
         
         if not encoded_img:
-            print('캐시 저장')
             file = fs.get(ObjectId(img_id))
             
             encoded_img = base64.b64encode(file.read()).decode('utf-8')
@@ -137,7 +136,6 @@ class OfflinePopupStoreSerializer(serializers.Serializer):
             encoded_img = cache.get(cache_key)
             
             if not encoded_img:
-                print('캐시 저장')
                 file = fs.get(img.grid_id)
                 
                 encoded_img = base64.b64encode(file.read()).decode('utf-8')
@@ -198,7 +196,6 @@ class MainPopupSerializer(serializers.Serializer):
         encoded_img = cache.get(cache_key)
         
         if not encoded_img:
-            print('캐시 저장')
             file = fs.get(ObjectId(img_id))
             
             encoded_img = base64.b64encode(file.read()).decode('utf-8')
