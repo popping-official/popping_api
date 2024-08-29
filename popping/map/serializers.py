@@ -114,6 +114,7 @@ class OfflinePopupStoreSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=200)
     location = LocationDictSerializer(required=False)
     date = DateDictSerializer(required=False)
+    tag = serializers.ListField()
     openTime = serializers.ListField(child=serializers.JSONField(), required=False)
     description = serializers.ListField(child=serializers.CharField(), required=False)
     isSaved = serializers.SerializerMethodField(required=False)
@@ -121,9 +122,8 @@ class OfflinePopupStoreSerializer(serializers.Serializer):
     homepage = serializers.CharField(max_length=200)
     sns = serializers.CharField(max_length=200)
     viewCount = serializers.SerializerMethodField()
-    # view = serializers.IntegerField()
-    # saved = serializers.IntegerField()
-    
+    saveCount = serializers.SerializerMethodField()
+
     def get_image(self, obj):
         db = MongoDBClient.get_database('poppingmongo')
         fs = gridfs.GridFS(db)
@@ -161,6 +161,14 @@ class OfflinePopupStoreSerializer(serializers.Serializer):
             viewCount = obj.get('viewCount')
             
         return viewCount
+
+    def get_saveCount(self, obj):
+        try:
+            saveCount = obj.saveCount
+        except:
+            saveCount = obj.get('saveCount')
+
+        return saveCount
         
 class MainPopupSerializer(serializers.Serializer):
     id = serializers.SerializerMethodField()

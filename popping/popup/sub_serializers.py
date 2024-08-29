@@ -1,9 +1,13 @@
-from rest_framework import serializers
-from datetime import datetime
 
 from .models import Brands, Product, OrderCS
+from map.serializers import LocationDictSerializer
+from rest_framework import serializers
 from user.models import User
-from map.serializers import LocationDictSerializer, Base64ImageField
+import base64
+import gridfs
+from map.mongodb import MongoDBClient
+from django.core.cache import cache
+from bson import ObjectId
 
 
 class BrandSimpleSerializers(serializers.ModelSerializer):
@@ -52,7 +56,7 @@ class PopupStoreSimpleSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=200)
     location = LocationDictSerializer(required=False)
     isSaved = serializers.SerializerMethodField(required=False)
-    image = Base64ImageField(required=False)
+    image = serializers.SerializerMethodField(required=False)
 
     def get_isSaved(self, obj):
         try:
@@ -60,6 +64,28 @@ class PopupStoreSimpleSerializer(serializers.Serializer):
             return str(obj.id) in user.savedPopup
         except:
             return False
+
+    def get_image(self, obj):
+
+        db = MongoDBClient.get_database('poppingmongo')
+        fs = gridfs.GridFS(db)
+
+        try:
+            img_id = str(obj.image[0].grid_id)
+        except:
+            img_id = str(obj.get('image')[0])
+
+        cache_key = f"popup_image_{img_id}"
+        encoded_img = cache.get(cache_key)
+
+        if not encoded_img:
+            print('캐시 저장')
+            file = fs.get(ObjectId(img_id))
+
+            encoded_img = base64.b64encode(file.read()).decode('utf-8')
+            cache.set(cache_key, encoded_img, timeout=60 * 60 * 24)  # 24시간 동안 캐시
+
+        return encoded_img
 
 
 class OrderCSSerializers(serializers.ModelSerializer):
