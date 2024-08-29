@@ -85,7 +85,6 @@ def main_popup(request):
 
     # 집계 실행
     popularity_query = list(collection.aggregate(popularity_pipeline))
-    print(popularity_query)
     date_query = list(collection.aggregate(date_pipeline))
     
     popularity_serializer = MainPopupSerializer(popularity_query, many=True)
