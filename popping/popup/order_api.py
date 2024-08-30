@@ -35,7 +35,7 @@ class OrderApi(APIView):
 
 		user: User = request.user
 
-		response_data['brand'] = Brands.objects.get(proceeding=1).manager.nickname.upper()
+		# response_data['brand'] = Brands.objects.get(proceeding=1).manager.nickname.upper()
 
 		point_history = PointHistory.objects.filter(userFK=user).last()
 		response_data['point'] = point_history.currentPoint

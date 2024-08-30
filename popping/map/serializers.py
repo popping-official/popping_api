@@ -83,7 +83,8 @@ class OfflinePopupStoreSimpleSerializer(serializers.Serializer):
     image = serializers.SerializerMethodField(required=False)
     # viewCount = serializers.IntegerField()
     viewCount = serializers.SerializerMethodField()
-    
+    brandName = serializers.CharField(max_length=200)
+
     def get_id(self, obj):
         try:
             id = str(obj.id)

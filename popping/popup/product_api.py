@@ -48,7 +48,7 @@ class CartAPI(APIView):
 			return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 		response_data = dict()
-		response_data['brand'] = Brands.objects.get(proceeding=1).manager.nickname.upper()
+		# response_data['brand'] = Brands.objects.get(proceeding=1).manager.nickname.upper()
 
 		cart_query: Cart = Cart.objects.filter(userFK=request.user)
 		response_data['cart'] = CartSerializers(cart_query, many=True, context={'user': request.user}).data
