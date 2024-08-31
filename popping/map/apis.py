@@ -95,23 +95,24 @@ def main_popup(request):
     }
     
     return Response(response_data, status=status.HTTP_200_OK)
-    
+
+
+
 # 팝업리스트 api
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def offline_popups(request):
     response_data = {}
-    
+
     context = {"user": request.user}
-    
+
     sort_option = request.GET.get('sorted')
     district = request.GET.get('district')
     search = request.GET.get('search')
-    
     # 모든 PopupStore 문서를 조회
-    popupStore_query = OfflinePopup.objects.filter(status=1)
-    
-    # 자치구 필터링    
+    popupStore_query = OfflinePopup.objects.filter(status__in=[1,2])
+
+    # 자치구 필터링
     if district:
         # location.address 필드에서 district를 포함하는 문서만 필터링
         popupStore_query = popupStore_query.filter(
@@ -126,10 +127,10 @@ def offline_popups(request):
     # 정렬
     match sort_option:
         case "distance":
-            
+
             geo_x = float(request.GET.get('geoX'))
             geo_y = float(request.GET.get('geoY'))
-            
+
             # # x,y를 중심으로 팝업리스트 거리순 정렬
             popupStore_query = popupStore_query.filter(
                 location__geoData__near=[geo_x, geo_y]
@@ -137,16 +138,16 @@ def offline_popups(request):
         # 이건 api 호출보단 front에서 정렬하는게 나을듯???
         case "popularity":
             popupStore_query = popupStore_query.order_by('-viewCount')[:10]
-        
+
         case _:
             pass
-    
+
     serializer = OfflinePopupStoreSimpleSerializer(popupStore_query, many=True, context=context)
-    
+
     response_data = {
         'popupStores': serializer.data
     }
-    
+
     return Response(response_data, status=status.HTTP_200_OK)
 
 # 위치 중심 팝업 리스트 조회
@@ -238,8 +239,13 @@ def popup_detail(request, popupId):
     response_data = {}
     
     context = {"user": request.user}
-    
-    popupStore_query = OfflinePopup.objects.get(id=popupId)
+
+    try:
+        popupStore_query = OfflinePopup.objects.get(id=popupId)
+    except:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
     serializer = OfflinePopupStoreSerializer(popupStore_query, context=context)
     response_data = {
         'popupData': serializer.data
@@ -250,17 +256,12 @@ def popup_detail(request, popupId):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def count_view(request, popupId):
-    
-    # option = request.GET.get('option')
-    
-    # match option:
-        
-    #     case "popup":
-    #         data_query = OfflinePopup.objects.get(id=popupId)
-    #     case "place":
-    #         data_query = Place.objects.get(id=popupId)
-    
-    data_query = OfflinePopup.objects.get(id=popupId)            
+
+    try:
+        data_query = OfflinePopup.objects.get(id=popupId)
+    except:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
     data_query.viewCount = data_query.viewCount + 1
     data_query.save()  # 변경된 내용을 저장
     

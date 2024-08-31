@@ -86,7 +86,7 @@ def test_function_mongodb(request) -> Response:
 	from map.models import OfflinePopup
 	from map.serializers import OfflinePopupStoreSerializer
 	if request.user.is_anonymous:
-		return Response(status.HTTP_401_UNAUTHORIZED)
+		return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 	context = {"user": request.user}
 
