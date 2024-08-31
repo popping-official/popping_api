@@ -64,7 +64,7 @@ class CartAPI(APIView):
 			option: dict -> key: (Color, Size) value: (str, str)
 		"""
 		if request.user.is_anonymous:
-			return Response(status.HTTP_401_UNAUTHORIZED)
+			return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 		try:
 			pid: int = request.data.get('id')

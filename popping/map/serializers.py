@@ -72,63 +72,63 @@ class PlaceSerializer(serializers.Serializer):
     #     ret = super().to_representation(instance)
     #     ret['id'] = str(ret['id'])  # ObjectId를 문자열로 변환
     #     return ret
-    
+
 class OfflinePopupStoreSimpleSerializer(serializers.Serializer):
     # id = serializers.CharField(source='_id',max_length=200)
     id = serializers.SerializerMethodField()
     title = serializers.CharField(max_length=200)
     location = LocationDictSerializer(required=False)
-    description = serializers.ListField(child=serializers.CharField(), required=False)
     isSaved = serializers.SerializerMethodField(required=False)
     image = serializers.SerializerMethodField(required=False)
     # viewCount = serializers.IntegerField()
     viewCount = serializers.SerializerMethodField()
     brandName = serializers.CharField(max_length=200)
+    status = serializers.IntegerField()
+    date = DateDictSerializer(required=False)
 
     def get_id(self, obj):
         try:
             id = str(obj.id)
         except:
             id = str(obj.get('_id'))
-            
+
         return id
-    
+
     def get_image(self, obj):
-        
         db = MongoDBClient.get_database('poppingmongo')
         fs = gridfs.GridFS(db)
-        
+
         try:
             img_id = str(obj.image[0].grid_id)
         except:
             img_id = str(obj.get('image')[0])
-            
+
         cache_key = f"popup_image_{img_id}"
         encoded_img = cache.get(cache_key)
-        
+
         if not encoded_img:
             file = fs.get(ObjectId(img_id))
-            
+
             encoded_img = base64.b64encode(file.read()).decode('utf-8')
             cache.set(cache_key, encoded_img, timeout=60*60*24)  # 24시간 동안 캐시
-            
+
         return encoded_img
-    
+
     def get_viewCount(self,obj):
         try:
             viewCount = obj.viewCount
         except:
             viewCount = obj.get('viewCount')
-            
+
         return viewCount
-    
+
     def get_isSaved(self, obj):
         user: User = self.context.get('user')
         try:
             return str(obj.id) in user.savedPopup
         except:
             return False
-        
+
 class OfflinePopupStoreSerializer(serializers.Serializer):
     id = serializers.CharField(max_length=200)
     brandName = serializers.CharField(max_length=200)
