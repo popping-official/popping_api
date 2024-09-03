@@ -125,6 +125,10 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
         default=list
     )
 
+    recent = models.JSONField(
+        default=dict
+    )
+    
     objects = UserManager()
     
     USERNAME_FIELD = 'email'
