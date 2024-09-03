@@ -7,12 +7,16 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from mongoengine.queryset.visitor import Q
+from rest_framework.pagination import PageNumberPagination
 from config.settings import MONGO_DB_NAME
 from .models import OfflinePopup, Place
 from .serializers import PlaceSerializer, OfflinePopupStoreSerializer, OfflinePopupStoreSimpleSerializer, MainPopupSerializer
 from .mongodb import MongoDBClient
-from bson import ObjectId
 from datetime import datetime
+
+class CustomPagenation(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = "page_size"
 
 # main page 팝업 리스트들
 @api_view(['GET'])
@@ -96,8 +100,6 @@ def main_popup(request):
     
     return Response(response_data, status=status.HTTP_200_OK)
 
-
-
 # 팝업리스트 api
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -109,6 +111,8 @@ def offline_popups(request):
     sort_option = request.GET.get('sorted')
     district = request.GET.get('district')
     search = request.GET.get('search')
+    page = request.GET.get('page')
+    
     # 모든 PopupStore 문서를 조회
     popupStore_query = OfflinePopup.objects.filter(status__in=[1,2])
 
@@ -137,18 +141,30 @@ def offline_popups(request):
             )
         # 이건 api 호출보단 front에서 정렬하는게 나을듯???
         case "popularity":
-            popupStore_query = popupStore_query.order_by('-viewCount')[:10]
+            popupStore_query = popupStore_query.order_by('-viewCount')
 
         case _:
             pass
+    
+    if page:
+        
+        paginator = CustomPagenation()
+        paginated_result = paginator.paginate_queryset(popupStore_query, request)
+        
+        # 결과 시리얼라이즈
+        serializer = OfflinePopupStoreSimpleSerializer(paginated_result, many=True, context=context)
+        
+        # 페이지네이션된 응답 반환
+        return paginator.get_paginated_response(serializer.data)
+    
+    else:
+        serializer = OfflinePopupStoreSimpleSerializer(popupStore_query, many=True, context=context)
 
-    serializer = OfflinePopupStoreSimpleSerializer(popupStore_query, many=True, context=context)
+        response_data = {
+            'popupStores': serializer.data
+        }
 
-    response_data = {
-        'popupStores': serializer.data
-    }
-
-    return Response(response_data, status=status.HTTP_200_OK)
+        return Response(response_data, status=status.HTTP_200_OK)
 
 # 위치 중심 팝업 리스트 조회
 @api_view(['GET'])
@@ -200,8 +216,10 @@ def surround_popup(request):
 @permission_classes([AllowAny])
 def surround_place(request):
     response_data = {}
+    
     popup_id = request.GET.get('popupId')
     radius_in_meters = int(request.GET.get('meter'))
+    page = request.GET.get('page')
     
     popup_store = OfflinePopup.objects.get(id=popup_id)
     
@@ -225,12 +243,25 @@ def surround_place(request):
     ]
     
     nearby_locations = list(collection.aggregate(pipeline))
-    serializer = PlaceSerializer(nearby_locations, many=True)
-    response_data = {
-        'place':serializer.data
-    }
-                
-    return Response(response_data, status=status.HTTP_200_OK)
+    
+    if page:
+        # 페이지네이션 객체 생성 및 적용
+        paginator = CustomPagenation()
+        paginated_result = paginator.paginate_queryset(nearby_locations, request)
+        
+        # 결과 시리얼라이즈
+        serializer = PlaceSerializer(paginated_result, many=True)
+        
+        # 페이지네이션된 응답 반환
+        return paginator.get_paginated_response(serializer.data)
+    
+    else:
+        serializer = PlaceSerializer(nearby_locations, many=True)
+        response_data = {
+            'place':serializer.data
+        }
+                    
+        return Response(response_data, status=status.HTTP_200_OK)
 
 # 팝업 조회 api
 @api_view(['GET'])
@@ -266,8 +297,4 @@ def count_view(request, popupId):
     data_query.save()  # 변경된 내용을 저장
     
     return Response(status=status.HTTP_200_OK)
-
-
-        
-
 
