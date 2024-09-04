@@ -20,6 +20,8 @@ class UserManager(BaseUserManager):
         # extra_fields.setdefault('is_superuser', True)
         return self.create_user(email, password, **extra_fields)
     
+def default_recent():
+    return {'recentProduct': [], 'recentPopup': []}
 
 class User(AbstractBaseUser, PermissionsMixin, TimeModel):
     '''
@@ -126,15 +128,27 @@ class User(AbstractBaseUser, PermissionsMixin, TimeModel):
     )
 
     recent = models.JSONField(
-        default=dict
+        default=default_recent
     )
     
     objects = UserManager()
     
     USERNAME_FIELD = 'email'
     
+    def save(self, *args, **kwargs):
+        
+        recent_popup_list = self.recent.get('recentPopup', [])
+        
+        # 최대 10개 제한
+        if len(recent_popup_list) > 10:
+            self.recent['recentPopup'] = recent_popup_list[-10:]
+
+        super().save(*args, **kwargs)
+    
     def get_by_natural_key(self, email):
         return self.get(email=email)
+    
+
 
 
 class SocialUser(TimeModel): 
